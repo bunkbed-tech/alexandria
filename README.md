@@ -1,6 +1,6 @@
 # Alexandria
 
-The is your long lost media library. Track your book, movie, tv, and game backlogs. Maintain digital metadata libraries of your physical collections. Do it all without paid features or forced social media participation.
+Alexandria is your long lost media library. Track your book, movie, tv, and game backlogs. Maintain digital metadata libraries of your physical collections. Do it all without paid features or forced social media participation.
 
 ## Implementation
 
