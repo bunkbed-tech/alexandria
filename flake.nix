@@ -29,6 +29,7 @@
             "rustc"
             "rustfmt"
           ])
+          nodePackages.pnpm
           rust-analyzer-nightly
         ];
       };
