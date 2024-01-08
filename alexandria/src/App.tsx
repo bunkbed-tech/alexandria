@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/tauri"
 
 export function App() {
   const [message, setMessage] = createSignal()
-  createEffect(() => invoke("greet", { name: "Joe Schmoe" }).then(setMessage))
+  createEffect(() => invoke("list_resources").then(setMessage))
   return <p>{message}</p>
 }
 
