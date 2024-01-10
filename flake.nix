@@ -1,38 +1,39 @@
 {
   description = "Media tracker in Tauri + SolidJS";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
-    devshell.url = "github:numtide/devshell";
-    devshell.inputs.nixpkgs.follows = "nixpkgs";
-    devshell.inputs.flake-utils.follows = "flake-utils";
-    flake-utils.url = "github:numtide/flake-utils";
-    fenix-flake.url = "github:nix-community/fenix";
-    fenix-flake.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs.url = github:nixos/nixpkgs;
+    flake-parts.url = github:hercules-ci/flake-parts;
+    fenix.url = github:nix-community/fenix;
+    systems.url = github:nix-systems/default;
   };
-  outputs = { self, nixpkgs, devshell, flake-utils, fenix-flake }: flake-utils.lib.eachDefaultSystem (system:
-    let
-      project = "alexandria";
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [ devshell.overlays.default fenix-flake.overlays.default ];
+  outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+    systems = import inputs.systems;
+    perSystem = {config, lib, pkgs, system, ...}: {
+      packages.alexandria = let
+        rust-minimal = inputs.fenix.packages.${system}.minimal.toolchain;
+        platform = pkgs.makeRustPlatform {
+          cargo = rust-minimal;
+          rustc = rust-minimal;
+        };
+      in platform.buildRustPackage {
+        pname = "alexandria";
+        version = "0.0.1";
+        src = ./alexandria/src-tauri;
+        cargoLock.lockFile = ./alexandria/src-tauri/Cargo.lock;
+        # TODO override the carbon headers because they seem to not show up at all
+        propagatedBuildInputs = lib.optionals pkgs.stdenv.isDarwin [pkgs.darwin.CarbonHeaders];
       };
-    in
-    rec {
-      devShell = pkgs.devshell.mkShell {
-        name = "${project}-shell";
-        packages = with pkgs; [
-          nixpkgs-fmt
-          (fenix.complete.withComponents [
-            "cargo"
-            "clippy"
-            "rust-src"
-            "rustc"
-            "rustfmt"
+      devShells.default = pkgs.mkShell {
+        packages = lib.lists.flatten [
+          (with config.packages; [alexandria])
+          (with inputs.fenix.packages.${system}; [
+            complete.toolchain
+            rust-analyzer
+            rust-analyzer-vscode-extension
           ])
-          nodePackages.pnpm
-          rust-analyzer-nightly
+          (with pkgs; [nodePackages.pnpm])
         ];
       };
-    }
-  );
+    };
+  };
 }
