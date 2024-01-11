@@ -20,8 +20,7 @@
         version = "0.0.1";
         src = ./alexandria/src-tauri;
         cargoLock.lockFile = ./alexandria/src-tauri/Cargo.lock;
-        # TODO override the carbon headers because they seem to not show up at all
-        propagatedBuildInputs = lib.optionals pkgs.stdenv.isDarwin [pkgs.darwin.CarbonHeaders];
+        buildInputs = lib.optionals pkgs.stdenv.isDarwin [pkgs.darwin.apple_sdk.frameworks.Carbon];
       };
       devShells.default = pkgs.mkShell {
         packages = lib.lists.flatten [
