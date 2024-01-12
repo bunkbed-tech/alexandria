@@ -17,8 +17,7 @@ services:
       - 5432:5432
   migrate:
     build:
-      context: src-tauri
-      dockerfile: migrate.Dockerfile
+      dockerfile: docker/migrate.Dockerfile
     container_name: migrate
     env_file: .env
     environment:
