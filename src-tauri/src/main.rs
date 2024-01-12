@@ -1,11 +1,12 @@
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::env::var;
 
+use serde::{Serialize, Deserialize};
 use serde_json::to_string_pretty;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use tauri::{State, command};
-
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Resource {
@@ -19,8 +20,8 @@ struct Resource {
 }
 
 #[command]
-fn list_resources(state: State<'_, PgPoolWrapper>) -> Result<String, String> {
-    let rows: Vec<Resources> = {
+async fn list_resources(state: State<'_, PgPoolWrapper>) -> Result<String, String> {
+    let rows: Vec<Resource> = {
         sqlx::query_as!(Resource, r#"SELECT * FROM resource"#)
             .fetch_all(&state.pool)
             .await
@@ -34,7 +35,7 @@ struct PgPoolWrapper {
 }
 
 #[async_std::main]
-fn main() {
+async fn main() {
     let database_url = var("DATABASE_URL").expect("DATABASE_URL must be set to connect to database");
     let pool = PgPoolOptions::new()
         .max_connections(5)
@@ -44,7 +45,7 @@ fn main() {
 
     tauri::Builder::default()
         .manage(PgPoolWrapper { pool })
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![list_resources])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
 }
