@@ -1,6 +1,4 @@
 FROM rust:1.75 AS base
-
-RUN cargo install sqlx-cli --no-default-features --features native-tls,postgres
 RUN apt-get update --yes && \
     apt-get install --yes \
         libsoup2.4-dev \
@@ -8,14 +6,13 @@ RUN apt-get update --yes && \
         librust-gdk-sys-dev \
         libatk1.0-dev \
         libwebkit2gtk-4.0-dev
-
 WORKDIR /code
-EXPOSE 8080
-
 RUN cargo init
 COPY Cargo.toml Cargo.lock ./
 RUN cargo build
-COPY . .
+COPY src src
+COPY icons icons
+COPY build.rs tauri.conf.json ./
 
 
 FROM base AS builder

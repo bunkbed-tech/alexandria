@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   db:
-    image: postgres:latest
+    image: postgres:15
     container_name: postgres
     env_file: .env
     healthcheck:
@@ -11,20 +11,31 @@ services:
       retries: 5
       start_period: 5s
     volumes:
-      - ./data:/var/lib/postgresql/data
-      - ./logs:/var/lib/postgresql/pg_log
+      - ./run/db/data:/var/lib/postgresql/data
+      - ./run/db/logs:/var/lib/postgresql/pg_log
     ports:
       - 5432:5432
-  backend:
+  migrate:
     build:
-      context: alexandria/src-tauri
-      target: base
-    container_name: backend
+      context: src-tauri
+      dockerfile: migrate.Dockerfile
+    container_name: migrate
     env_file: .env
-    entrypoint: ./entrypoint.sh
-    command: [ cargo, run, --offline ]
-    ports:
-      - 8080:8080
+    environment:
+      DATABASE_URL: postgresql://$POSTGRES_USER:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/$POSTGRES_DB
+    command: [ cargo, sqlx, migrate, run ]
     depends_on:
       db:
         condition: service_healthy
+  dummy_data:
+    image: postgres:15
+    container_name: dummy_data
+    working_dir: /data
+    env_file: .env
+    environment:
+      PGPASSWORD: $POSTGRES_PASSWORD
+    volumes:
+      - ./src-tauri/tests/data:/data
+    command: [ psql, -h, $POSTGRES_HOST, -U, $POSTGRES_USER, -d, $POSTGRES_DB, -f, dummy.sql]
+    depends_on:
+      - migrate
