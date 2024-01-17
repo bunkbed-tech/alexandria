@@ -3,6 +3,7 @@
 
 use std::env::var;
 
+use reqwest::get;
 use serde::{Serialize, Deserialize};
 use serde_json::to_string_pretty;
 use sqlx::postgres::{PgPool, PgPoolOptions};
@@ -17,6 +18,22 @@ struct Resource {
     owned: bool,
     want_to_own: bool,
     want_to_try: bool,
+}
+
+struct BGGItem {
+    name: String,
+    yearpublished: String,
+}
+
+#[command]
+async fn search_bgg(query: String) -> Result<String, String> {
+    // get("https://httpbin.org/ip")
+    get(format!("https://boardgamegeek.com/xmlapi2/search?query={}", query))
+        .await
+        .map_err(|err| err.to_string())?
+        .text()
+        .await
+        .map_err(|err| err.to_string())
 }
 
 #[command]
@@ -45,7 +62,7 @@ async fn main() {
 
     tauri::Builder::default()
         .manage(PgPoolWrapper { pool })
-        .invoke_handler(tauri::generate_handler![list_resources])
+        .invoke_handler(tauri::generate_handler![list_resources, search_bgg])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
 }
