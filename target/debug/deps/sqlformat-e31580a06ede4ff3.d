@@ -1,0 +1,10 @@
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libsqlformat-e31580a06ede4ff3.rmeta: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/formatter.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/indentation.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/inline_block.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/params.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/tokenizer.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/sqlformat-e31580a06ede4ff3.d: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/formatter.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/indentation.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/inline_block.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/params.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/tokenizer.rs
+
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/lib.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/formatter.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/indentation.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/inline_block.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/params.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlformat-0.2.3/src/tokenizer.rs:

@@ -1,0 +1,10 @@
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libcargo_toml-31723f325629d7d2.rmeta: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/cargo_toml.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/afs.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/error.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/inheritable.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libcargo_toml-31723f325629d7d2.rlib: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/cargo_toml.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/afs.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/error.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/inheritable.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/cargo_toml-31723f325629d7d2.d: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/cargo_toml.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/afs.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/error.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/inheritable.rs
+
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/cargo_toml.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/afs.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/error.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo_toml-0.15.3/src/inheritable.rs:
