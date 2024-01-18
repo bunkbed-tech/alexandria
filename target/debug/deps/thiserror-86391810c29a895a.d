@@ -1,0 +1,10 @@
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libthiserror-86391810c29a895a.rmeta: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libthiserror-86391810c29a895a.rlib: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/thiserror-86391810c29a895a.d: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs
+
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs:

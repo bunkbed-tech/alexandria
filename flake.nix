@@ -11,9 +11,15 @@
     perSystem = {config, lib, pkgs, system, ...}: {
       devShells.default = pkgs.mkShell {
         packages = lib.lists.flatten [
-          inputs.fenix.packages.${system}.minimal.toolchain
+          (with inputs.fenix.packages.${system}; combine [
+            minimal.cargo
+            minimal.rustc
+            targets.wasm32-unknown-unknown.latest.rust-std
+          ])
           (with pkgs; [
-            nodePackages.pnpm
+            trunk
+            wasm-bindgen-cli
+            cargo-tauri
             (lib.optionals stdenv.isDarwin (with darwin; [
               libiconv
               (with apple_sdk.frameworks; [

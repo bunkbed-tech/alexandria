@@ -1,0 +1,10 @@
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libproc_macro_utils-e5ef41281002ee66.rmeta: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/parser.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/assert.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/__private.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libproc_macro_utils-e5ef41281002ee66.rlib: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/parser.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/assert.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/__private.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/proc_macro_utils-e5ef41281002ee66.d: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/parser.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/assert.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/__private.rs
+
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/lib.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/parser.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/assert.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/proc-macro-utils-0.8.0/src/__private.rs:

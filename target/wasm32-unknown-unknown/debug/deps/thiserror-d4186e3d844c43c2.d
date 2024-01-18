@@ -1,0 +1,10 @@
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/wasm32-unknown-unknown/debug/deps/libthiserror-d4186e3d844c43c2.rmeta: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/wasm32-unknown-unknown/debug/deps/libthiserror-d4186e3d844c43c2.rlib: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/wasm32-unknown-unknown/debug/deps/thiserror-d4186e3d844c43c2.d: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs
+
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/lib.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/aserror.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/display.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.56/src/provide.rs:

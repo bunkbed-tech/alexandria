@@ -1,0 +1,10 @@
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libmanyhow-40242808a56aee75.rmeta: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/span_ranged.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/macro_rules.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/error.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/libmanyhow-40242808a56aee75.rlib: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/span_ranged.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/macro_rules.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/error.rs
+
+/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/debug/deps/manyhow-40242808a56aee75.d: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/span_ranged.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/macro_rules.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/error.rs
+
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/lib.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/span_ranged.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/macro_rules.rs:
+/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/manyhow-0.8.1/src/error.rs:
