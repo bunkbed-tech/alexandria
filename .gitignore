@@ -1,5 +1,4 @@
 .DS_Store
 /.direnv/
-/run
-dist
-target
+dist/
+target/

@@ -1,9 +1,0 @@
-/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/wasm32-unknown-unknown/debug/deps/libwasm_bindgen_futures-cb26317a2e96a158.rmeta: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/queue.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/task/singlethread.rs
-
-/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/wasm32-unknown-unknown/debug/deps/libwasm_bindgen_futures-cb26317a2e96a158.rlib: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/queue.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/task/singlethread.rs
-
-/Users/tristanschrader/Code/Personal/bunkbed/alexandria/target/wasm32-unknown-unknown/debug/deps/wasm_bindgen_futures-cb26317a2e96a158.d: /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/lib.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/queue.rs /Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/task/singlethread.rs
-
-/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/lib.rs:
-/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/queue.rs:
-/Users/tristanschrader/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.40/src/task/singlethread.rs:

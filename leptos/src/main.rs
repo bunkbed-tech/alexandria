@@ -5,32 +5,31 @@ use tauri_sys::tauri;
 #[derive(Serialize)]
 struct EmptyArgs {}
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct SearchBGGArgs{
-    query: String,
+    query: ReadSignal<String>,
 }
 
 #[component]
 fn alexandria() -> impl IntoView {
     let (query, set_query) = create_signal("".to_string());
-    let resources = create_local_resource(|| (), |_| async move { tauri::invoke::<_, String>("list_resources", &EmptyArgs {}).await });
-    let bgg_resources = create_local_resource(|| (), |_| async move { tauri::invoke::<_, String>("search_bgg", &EmptyArgs { query }).await });
+	let fetch_bgg_resources = create_action(|input: &SearchBGGArgs| {
+        let args = input.clone();
+        async move { tauri::invoke::<_, String>("search_bgg", &args).await }
+    });
+    let search_args = SearchBGGArgs { query };
+
     view! {
         <div>
-            <h1>List of resources</h1>
-            {move || match resources.get() {
-                None => view! { <p>"Loading..."</p> }.into_view(),
-                Some(result) => view! { <p>{result}</p> }.into_view()
-            }}
-            <h2>Boardgame Geek</h2>
+            <h2>Boardgamegeek</h2>
             <div>
                 <input type="text"
                        value=query
-                       on:input=move |event| set_query.set(event.target.value)
+                       on:input=move |event| set_query.set(event_target_value(&event))
                 />
-                <button>Search</button>
+            <button on:click=move |_| fetch_bgg_resources.dispatch(search_args.clone())>Search</button>
             </div>
-            {move || match bgg_resources.get() {
+            {move || match fetch_bgg_resources.value().get() {
                 None => view! { <p>"Loading..."</p> }.into_view(),
                 Some(result) => view! { <p>{result}</p> }.into_view()
             }}
