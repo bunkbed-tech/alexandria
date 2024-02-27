@@ -14,7 +14,7 @@ In development, you need to create the database, run migrations, and then start 
 docker-compose up
 
 # This will run the desktop application in development mode interactively.
-DATABASE_URL=postgresql://tester:password@127.0.0.1:5432/testing npm run tauri dev
+DATABASE_URL=postgresql://tester:password@127.0.0.1:5432/testing cargo tauri dev
 ```
 
 ## Implementation
