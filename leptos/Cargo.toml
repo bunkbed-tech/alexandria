@@ -1,11 +1,13 @@
 [package]
 name = "alexandria-leptos"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+edition.workspace = true
 
 [dependencies]
+serde.workspace = true
 leptos = { version = "0.5.6", features = ["csr"] }
-serde = { version = "1.0.195", features = ["derive"] }
 
 [dependencies.tauri-sys]
 git = "https://github.com/JonasKruckenberg/tauri-sys"

@@ -4,30 +4,14 @@
 use std::env::var;
 
 use reqwest::get;
-use serde::{Serialize, Deserialize};
 use serde_json::to_string_pretty;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use tauri::{State, command};
 
-#[derive(Serialize, Deserialize, Debug)]
-struct Resource {
-    id: i64,
-    title: String,
-    description: String,
-    year_published: i64,
-    owned: bool,
-    want_to_own: bool,
-    want_to_try: bool,
-}
-
-struct BGGItem {
-    name: String,
-    yearpublished: String,
-}
+use models::Resource;
 
 #[command]
 async fn search_bgg(query: String) -> Result<String, String> {
-    // get("https://httpbin.org/ip")
     get(format!("https://boardgamegeek.com/xmlapi2/search?query={}", query))
         .await
         .map_err(|err| err.to_string())?

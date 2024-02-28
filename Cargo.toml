@@ -1,3 +1,33 @@
 [workspace]
 resolver = "2"
-members = ["tauri", "leptos"]
+members = ["tauri", "leptos", "shared/*"]
+
+[workspace.package]
+version = "0.0.1"
+authors = ["Tristan Schrader", "Tahoe Schrader"]
+description = "Track your media"
+edition = "2021"
+# TODO license = "GPL"
+
+[workspace.dependencies]
+serde_json = "1.0.105"
+
+[workspace.dependencies.serde]
+version = "1.0.195"
+features = ["derive"]
+
+[workspace.dependencies.models]
+path = "shared/models"
+
+# TODO look into profiles!
+# [profile.release]
+# panic = "abort"
+# codegen-units = 1
+# lto = "fat"
+# opt-level = "z"
+# strip = true
+
+# [profile.dev]
+# opt-level = 0
+# codegen-units = 256
+# lto = "off"
