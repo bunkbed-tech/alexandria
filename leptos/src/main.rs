@@ -2,9 +2,6 @@ use leptos::*;
 use serde::Serialize;
 use tauri_sys::tauri;
 
-#[derive(Serialize)]
-struct EmptyArgs {}
-
 #[derive(Serialize, Clone)]
 struct SearchBGGArgs{
     query: ReadSignal<String>,

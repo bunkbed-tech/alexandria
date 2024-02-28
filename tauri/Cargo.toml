@@ -1,25 +1,23 @@
 [package]
-name = "alexandria"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+name = "alexandria-tauri"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+edition.workspace = true
 
 [build-dependencies]
 tauri-build = { version = "1.4", features = [] }
 
 [dependencies]
 tauri = { version = "1.4", features = ["shell-open"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
 sqlx = { version = "0.7.3", features = ["runtime-async-std", "tls-native-tls", "postgres", "time", "migrate"] }
 async-std = { version = "1.12.0", features = ["attributes"] }
 reqwest = "0.11.23"
 quick-xml = { version = "0.31.0", features = ["serialize"] }
+# TODO look at tauri features = ["fs-write-file", "dialog-save"]
+serde.workspace = true
+serde_json.workspace = true
+models.workspace = true
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
