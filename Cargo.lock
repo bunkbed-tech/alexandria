@@ -44,6 +44,7 @@ name = "alexandria-leptos"
 version = "0.0.1"
 dependencies = [
  "leptos",
+ "models",
  "serde",
  "tauri-sys",
 ]
