@@ -12,14 +12,23 @@ use quick_xml::de::from_str;
 
 use models::Resource;
 
+// impl From<i32> for Option<i64> {
+//     fn from(int: i32) -> Self {
+//         Some(int)
+//     }
+// }
+
 #[command]
-async fn search_bgg(query: String) -> Result<String, String> {
-    get(format!("https://boardgamegeek.com/xmlapi2/search?query={}", query))
+async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
+    let xml = get(format!("https://boardgamegeek.com/xmlapi2/search?query={}", query))
         .await
         .map_err(|err| err.to_string())?
         .text()
         .await
-        .map_err(|err| err.to_string())
+        .map_err(|err| err.to_string())?;
+    let items: Items = from_str(&xml).map_err(|err| err.to_string())?;
+    let resources: Vec<Resource> = items.into();
+    Ok(resources)
 }
 
 #[command]
@@ -48,7 +57,10 @@ async fn main() {
 
     tauri::Builder::default()
         .manage(PgPoolWrapper { pool })
-        .invoke_handler(tauri::generate_handler![list_resources, search_bgg])
+        .invoke_handler(tauri::generate_handler![
+            list_resources,
+            search_bgg,
+        ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
 }
@@ -62,7 +74,7 @@ struct Attribute {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 struct Item {
     name: Attribute,
-    yearpublished: Attribute,
+    yearpublished: Option<Attribute>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -76,7 +88,7 @@ impl Into<Resource> for Item {
             id: 0,
             title: self.name.value,
             description: "".to_string(),
-            year_published: self.yearpublished.value.parse::<i64>().unwrap(),
+            year_published: self.yearpublished.map(|year| year.value.parse::<i32>().expect("Not a valid year")),
             owned: false,
             want_to_own: false,
             want_to_try: false,
@@ -103,11 +115,11 @@ mod tests {
             item: vec![
                 Item {
                     name: Attribute { value: String::from("Grind House: Scythes Out") },
-                    yearpublished: Attribute { value: String::from("2023") },
+                    yearpublished: Some(Attribute { value: String::from("2023") }),
                 },
                 Item {
                     name: Attribute { value: String::from("My Little Scythe") },
-                    yearpublished: Attribute { value: String::from("2017") },
+                    yearpublished: Some(Attribute { value: String::from("2017") }),
                 },
             ],
         };
@@ -117,7 +129,7 @@ mod tests {
             id: 0,
             title: String::from("Grind House: Scythes Out"),
             description: "".to_string(),
-            year_published: 2023,
+            year_published: Some(2023),
             owned: false,
             want_to_own: false,
             want_to_try: false,
@@ -126,7 +138,7 @@ mod tests {
             id: 0,
             title: String::from("My Little Scythe"),
             description: "".to_string(),
-            year_published: 2017,
+            year_published: Some(2017),
             owned: false,
             want_to_own: false,
             want_to_try: false,

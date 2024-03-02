@@ -34,7 +34,7 @@ services:
     environment:
       PGPASSWORD: $POSTGRES_PASSWORD
     volumes:
-      - ./tauri/tests/data:/data
+      - ./shared/models/tests/data:/data
     command: [ psql, -h, $POSTGRES_HOST, -U, $POSTGRES_USER, -d, $POSTGRES_DB, -f, dummy.sql]
     depends_on:
       - migrate
