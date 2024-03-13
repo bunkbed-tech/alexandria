@@ -11,11 +11,11 @@
     perSystem = {config, lib, pkgs, system, ...}: {
       devShells.default = pkgs.mkShell {
         packages = let
-          toolchain = with inputs.fenix.packages.${system}; combine [
-            stable.cargo
-            stable.rustc
+          toolchain = with inputs.fenix.packages.${system}; combine (lib.lists.flatten [
+            (with stable; [cargo rustc rust-src])
             targets.wasm32-unknown-unknown.stable.rust-std
-          ];
+            rust-analyzer
+          ]);
         in lib.lists.flatten [
           toolchain
           (with pkgs; [
