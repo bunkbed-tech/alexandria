@@ -1,8 +1,12 @@
 [build]
-target = "./leptos/index.html"
+target = "./index.html"
 
 [watch]
-ignore = ["./tauri"]
+ignore = [
+    "./tauri",
+    "./public/js",
+    "./style/leptonic"
+]
 
 [serve]
 address = "127.0.0.1"

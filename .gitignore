@@ -2,3 +2,5 @@
 /.direnv/
 dist/
 target/
+/style/leptonic/
+/public/js/
