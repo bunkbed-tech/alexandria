@@ -6,20 +6,19 @@ description.workspace = true
 edition.workspace = true
 
 [build-dependencies]
-tauri-build = { version = "1.4", features = [] }
+tauri-build = { version = "2.0.0-beta", features = [] }
 
 [dependencies]
-tauri = { version = "1.4", features = ["shell-open"] }
-sqlx = { version = "0.7.3", features = ["runtime-async-std", "tls-native-tls", "postgres", "time", "migrate"] }
 async-std = { version = "1.12.0", features = ["attributes"] }
-reqwest = "0.11.23"
+sqlx = { version = "0.7.3", features = ["runtime-async-std", "tls-native-tls", "postgres", "time", "migrate"] }
 quick-xml = { version = "0.31.0", features = ["serialize"] }
-# TODO look at tauri features = ["fs-write-file", "dialog-save"]
+reqwest = "0.11.23"
+tauri = { version = "2.0.0-beta", features = [] }
+tauri-plugin-shell = "2.0.0-beta"
 serde.workspace = true
 serde_json.workspace = true
 models.workspace = true
 
-[features]
-# this feature is used for production builds or when `devPath` points to the filesystem
-# DO NOT REMOVE!!
-custom-protocol = ["tauri/custom-protocol"]
+[lib]
+name = "alexandria_tauri_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
