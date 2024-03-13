@@ -23,7 +23,7 @@ fn alexandria() -> impl IntoView {
     tracing::info!("Welcome to Alexandria!");
 
     let (query, set_query) = create_signal(String::new());
-	let fetch_bgg_resources = create_action(move |_: &()| async move {
+    let fetch_bgg_resources = create_action(move |_: &()| async move {
         let args = to_value(&SearchBGGArgs { query: &query }).unwrap();
         from_value::<Vec<Resource>>(invoke("search_bgg", args).await).map_err(|err| err.to_string())
     });
@@ -55,8 +55,6 @@ fn alexandria() -> impl IntoView {
         </Root>
     }
 }
-
-
 
 fn main() {
     mount_to_body(|| view! { <Alexandria /> })

@@ -4,3 +4,4 @@ dist/
 target/
 /style/leptonic/
 /public/js/
+/.pre-commit-config.yaml
