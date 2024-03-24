@@ -24,8 +24,11 @@ fn results(resources: Vec<Resource>) -> impl IntoView {
         resources.chunks(3).map(|chunk| chunk.to_vec()).collect();
     let resource_tile = move |resource: Resource| {
         view! {
-            <Col md=3 sm=4 xs=6>
-                <Skeleton animated=false>{resource.title} " (" {resource.year_published} ")"</Skeleton>
+            <Col md=1 sm=1 xs=1>
+                <Stack spacing=Size::Em(0.6)>
+                    <img src="assets/decrypto.png" />
+                    <p style="max-width: 200px; white-space: nowrap; overflow: hidden; text-align: center; text-overflow: ellipsis;">{resource.title} " (" {resource.year_published} ")"</p>
+                </Stack>
             </Col>
         }
     };
@@ -63,20 +66,18 @@ fn alexandria() -> impl IntoView {
             <Box style="display: flex; flex-direction: column; align-items: center; padding: 1em; min-height: 100%; min-width: 100%">
                 <H2>BoardGameGeek</H2>
                 <Stack spacing=Size::Em(2.0)>
-                    <div style="width: 100%;">
-                        <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(1.0)>
-                            <TextInput get=query set=set_query placeholder="Enter a query ..."/>
-                            <Button on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
-                        </Stack>
-                        {move || match fetch_bgg_resources.pending().get() {
-                            true => view! { <p>"Loading..."</p> }.into_view(),
-                            false => match fetch_bgg_resources.value().get() {
-                                None => view! {}.into_view(),
-                                Some(Err(error)) => view! { <p>"Error: " {error}</p> }.into_view(),
-                                Some(Ok(resources)) => view! { <Results resources=resources /> }.into_view(),
-                            },
-                        }}
-                    </div>
+                    <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(1.0)>
+                        <TextInput get=query set=set_query placeholder="Enter a query ..."/>
+                        <Button on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
+                    </Stack>
+                    {move || match fetch_bgg_resources.pending().get() {
+                        true => view! { <Skeleton animated=false>"Loading..."</Skeleton> }.into_view(),
+                        false => match fetch_bgg_resources.value().get() {
+                            None => view! {}.into_view(),
+                            Some(Err(error)) => view! { <p>"Error: " {error}</p> }.into_view(),
+                            Some(Ok(resources)) => view! { <Results resources=resources /> }.into_view(),
+                        },
+                    }}
                 </Stack>
             </Box>
         </Root>
