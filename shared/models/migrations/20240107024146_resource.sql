@@ -7,5 +7,5 @@ CREATE TABLE "resource" (
   owned BOOLEAN NOT NULL,
   want_to_own BOOLEAN NOT NULL,
   want_to_try BOOLEAN NOT NULL
-  -- thumbnail BYTEA
+  thumbnail TEXT NOT NULL,
 );

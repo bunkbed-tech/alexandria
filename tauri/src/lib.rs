@@ -11,7 +11,7 @@ use models::Resource;
 
 #[command]
 async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
-    let xml = get(format!(
+    let search_xml = get(format!(
         "https://boardgamegeek.com/xmlapi2/search?query={}",
         query
     ))
@@ -20,8 +20,40 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
     .text()
     .await
     .map_err(|err| err.to_string())?;
-    let items: Items = from_str(&xml).map_err(|err| err.to_string())?;
-    let resources: Vec<Resource> = items.into();
+    let search_items: SearchItems = from_str(&search_xml).map_err(|err| err.to_string())?;
+    let ids = search_items
+        .item
+        .clone()
+        .into_iter()
+        .map(|item| item.id)
+        .collect::<Vec<String>>();
+    let thing_xml = get(format!(
+        "https://boardgamegeek.com/xmlapi2/thing?id={}",
+        ids.join(",")
+    ))
+    .await
+    .map_err(|err| err.to_string())?
+    .text()
+    .await
+    .map_err(|err| err.to_string())?;
+    let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| err.to_string())?;
+    let resources = search_items
+        .item
+        .into_iter()
+        .zip(thing_items.item.into_iter())
+        .map(|(search, thing)| Resource {
+            id: search.id.parse::<i64>().expect("Not a valid ID"),
+            title: search.name.value,
+            description: "".to_string(),
+            year_published: search
+                .yearpublished
+                .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
+            owned: false,
+            want_to_own: false,
+            want_to_try: false,
+            thumbnail: thing.thumbnail,
+        })
+        .collect();
     Ok(resources)
 }
 
@@ -65,36 +97,27 @@ struct Attribute {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-struct Item {
+struct SearchItem {
+    // #[serde(rename = "@id")]
+    id: String,
     name: Attribute,
     yearpublished: Option<Attribute>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-struct Items {
-    item: Vec<Item>,
+struct SearchItems {
+    item: Vec<SearchItem>,
 }
 
-impl Into<Resource> for Item {
-    fn into(self) -> Resource {
-        Resource {
-            id: 0,
-            title: self.name.value,
-            description: "".to_string(),
-            year_published: self
-                .yearpublished
-                .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
-            owned: false,
-            want_to_own: false,
-            want_to_try: false,
-        }
-    }
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+struct ThingItem {
+    #[serde(rename = "$text")]
+    thumbnail: String,
 }
 
-impl Into<Vec<Resource>> for Items {
-    fn into(self) -> Vec<Resource> {
-        self.item.into_iter().map(Into::into).collect()
-    }
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+struct ThingItems {
+    item: Vec<ThingItem>,
 }
 
 #[cfg(test)]
@@ -102,12 +125,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_xml() {
+    fn test_search_xml() {
         let xml = r#"<?xml version="1.0" encoding="utf-8"?><items total="75" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse"> <item type="boardgame" id="398158"> <name type="primary" value="Grind House: Scythes Out"/> <yearpublished value="2023" /> </item> <item type="boardgame" id="226320"> <name type="primary" value="My Little Scythe"/> <yearpublished value="2017" /> </item></items>"#;
-        let items: Items = from_str(&xml).unwrap();
-        let iitems = Items {
+        let items: SearchItems = from_str(&xml).unwrap();
+        let iitems = SearchItems {
             item: vec![
-                Item {
+                SearchItem {
+                    id: String::from("398158"),
                     name: Attribute {
                         value: String::from("Grind House: Scythes Out"),
                     },
@@ -115,7 +139,8 @@ mod tests {
                         value: String::from("2023"),
                     }),
                 },
-                Item {
+                SearchItem {
+                    id: String::from("226320"),
                     name: Attribute {
                         value: String::from("My Little Scythe"),
                     },
@@ -125,28 +150,49 @@ mod tests {
                 },
             ],
         };
-        let resources: Vec<Resource> = items.clone().into();
+        assert_eq!(items, iitems);
+    }
+
+    #[test]
+    fn test_thing_xml() {
+        let xml = r#"<?xml version="1.0" encoding="utf-8"?><items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse"><item type="boardgame" id="225694"><thumbnail>https://cf.geekdo-images.com/hHZWXnUTMYDd_KTAM6Jwlw__thumb/img/O5XHaPOALYquS058qcXWVm5b_k4=/fit-in/200x150/filters:strip_icc()/pic3759421.jpg</thumbnail></item></items>"#;
+        let items: ThingItems = from_str(&xml).unwrap();
+        let iitems = ThingItems {
+            item: vec![
+                ThingItem {
+                    thumbnail: String::from("https://cf.geekdo-images.com/hHZWXnUTMYDd_KTAM6Jwlw__thumb/img/O5XHaPOALYquS058qcXWVm5b_k4=/fit-in/200x150/filters:strip_icc()/pic3759421.jpg"),
+                },
+            ],
+        };
+        assert_eq!(items, iitems);
+    }
+
+    #[async_std::test]
+    async fn test_search_bgg() {
+        let query = String::from("Cranium Cadoo");
+        let resources = search_bgg(query).await.unwrap();
         let rresources = vec![
             Resource {
                 id: 0,
-                title: String::from("Grind House: Scythes Out"),
-                description: "".to_string(),
-                year_published: Some(2023),
+                title: String::from("Cranium Cadoo"),
+                description: String::from(""),
+                year_published: Some(2001),
                 owned: false,
                 want_to_own: false,
                 want_to_try: false,
+                thumbnail: String::from(""),
             },
             Resource {
-                id: 0,
-                title: String::from("My Little Scythe"),
-                description: "".to_string(),
-                year_published: Some(2017),
+                id: 14454,
+                title: String::from("Cranium Cadoo Booster Box"),
+                description: String::from(""),
+                year_published: Some(2001),
                 owned: false,
                 want_to_own: false,
                 want_to_try: false,
+                thumbnail: String::from(""),
             },
         ];
-        assert_eq!(items, iitems);
         assert_eq!(resources, rresources);
     }
 }

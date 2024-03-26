@@ -9,4 +9,5 @@ pub struct Resource {
     pub owned: bool,
     pub want_to_own: bool,
     pub want_to_try: bool,
+    pub thumbnail: String,
 }
