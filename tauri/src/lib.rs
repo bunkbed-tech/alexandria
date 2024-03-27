@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::env::var;
 
 use quick_xml::de::from_str;
@@ -51,8 +52,10 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
             owned: false,
             want_to_own: false,
             want_to_try: false,
-            thumbnail: thing.thumbnail,
+            thumbnail: thing.thumbnail.value,
         })
+        .collect::<HashSet<_>>()
+        .into_iter()
         .collect();
     Ok(resources)
 }
@@ -98,7 +101,7 @@ struct Attribute {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 struct SearchItem {
-    // #[serde(rename = "@id")]
+    #[serde(rename = "@id")]
     id: String,
     name: Attribute,
     yearpublished: Option<Attribute>,
@@ -110,9 +113,14 @@ struct SearchItems {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-struct ThingItem {
+struct Thumbnail {
     #[serde(rename = "$text")]
-    thumbnail: String,
+    value: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+struct ThingItem {
+    thumbnail: Thumbnail,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -160,7 +168,9 @@ mod tests {
         let iitems = ThingItems {
             item: vec![
                 ThingItem {
-                    thumbnail: String::from("https://cf.geekdo-images.com/hHZWXnUTMYDd_KTAM6Jwlw__thumb/img/O5XHaPOALYquS058qcXWVm5b_k4=/fit-in/200x150/filters:strip_icc()/pic3759421.jpg"),
+                    thumbnail: Thumbnail {
+                        value: String::from("https://cf.geekdo-images.com/hHZWXnUTMYDd_KTAM6Jwlw__thumb/img/O5XHaPOALYquS058qcXWVm5b_k4=/fit-in/200x150/filters:strip_icc()/pic3759421.jpg"),
+                    },
                 },
             ],
         };
@@ -173,14 +183,14 @@ mod tests {
         let resources = search_bgg(query).await.unwrap();
         let rresources = vec![
             Resource {
-                id: 0,
+                id: 6420,
                 title: String::from("Cranium Cadoo"),
                 description: String::from(""),
                 year_published: Some(2001),
                 owned: false,
                 want_to_own: false,
                 want_to_try: false,
-                thumbnail: String::from(""),
+                thumbnail: String::from("https://cf.geekdo-images.com/hQI6W-7HwKty4c5yLFP-Aw__thumb/img/_IyE4nIyGh7_PVfGCarLoNmDMGc=/fit-in/200x150/filters:strip_icc()/pic3335930.jpg"),
             },
             Resource {
                 id: 14454,
@@ -190,7 +200,7 @@ mod tests {
                 owned: false,
                 want_to_own: false,
                 want_to_try: false,
-                thumbnail: String::from(""),
+                thumbnail: String::from("https://cf.geekdo-images.com/jboSqbHm5jcQp7XJZPM-vw__thumb/img/v6dQ2IqIdGJIX19AVEZDSaQ5Nms=/fit-in/200x150/filters:strip_icc()/pic58689.jpg"),
             },
         ];
         assert_eq!(resources, rresources);

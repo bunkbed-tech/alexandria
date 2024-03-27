@@ -6,6 +6,6 @@ CREATE TABLE "resource" (
   year_published INTEGER,
   owned BOOLEAN NOT NULL,
   want_to_own BOOLEAN NOT NULL,
-  want_to_try BOOLEAN NOT NULL
-  thumbnail TEXT NOT NULL,
+  want_to_try BOOLEAN NOT NULL,
+  thumbnail TEXT NOT NULL
 );
