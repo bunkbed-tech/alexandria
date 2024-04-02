@@ -90,9 +90,9 @@ fn alexandria() -> impl IntoView {
 
         <Root default_theme=LeptonicTheme::default()>
             <Box style="display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-start; width: 100%; min-height: 100vh; overflow: hidden;">
-                <Drawer side=DrawerSide::Left shown=true style="overflow-y: scroll; background-color: var(--brand-color); min-height: 100vh;">
-                    <Stack spacing=Size::Em(0.5)>
-                        <H2>Search</H2>
+                <Drawer side=DrawerSide::Left shown=true style="overflow-y: scroll; min-height: 100vh;">
+                    <Stack spacing=Size::Em(0.0)>
+                        <Button style="padding: 12px; border: 0; border-radius: 0; width: 100%; justify-content: left; color: var(--collapsible-header-color); background-color: var(--collapsible-header-background-color);" on_click=move |_| {}>Search</Button>
                         <Collapsible>
                             <CollapsibleHeader slot>"Lists"</CollapsibleHeader>
                             <CollapsibleBody slot>"Owned"</CollapsibleBody>
@@ -104,7 +104,7 @@ fn alexandria() -> impl IntoView {
                         <H2>BoardGameGeek</H2>
                         <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(1.0)>
                             <TextInput get=query set=set_query placeholder="Enter a query ..."/>
-                            <Button on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
+                            <Button color=ButtonColor::Primary on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
                         </Stack>
                         {move || match fetch_bgg_resources.pending().get() {
                             true => view! { <Skeleton animated=false>"Loading..."</Skeleton> }.into_view(),
