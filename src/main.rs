@@ -24,8 +24,8 @@ fn resource_attribute_button(resource: Resource) -> impl IntoView {
     let (want_to_own, set_want_to_own) = create_signal(false);
     let (want_to_try, set_want_to_try) = create_signal(false);
     view! {
-        <Col md=1 sm=1 xs=1>
-            <Stack spacing=Size::Em(0.6)>
+        <Col md=1 sm=1 xs=1 style="justify-content: center;">
+            <Stack spacing=Size::Em(0.6) style="justify-content: flex-end;">
                 <img src={resource.thumbnail} />
                 <p style="max-width: 200px; white-space: nowrap; overflow: hidden; text-align: center; text-overflow: ellipsis;">{resource.title} " (" {resource.year_published} ")"</p>
                 <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(0.3)>
@@ -71,14 +71,44 @@ fn results(resources: Vec<Resource>) -> impl IntoView {
 }
 
 #[component]
-fn alexandria() -> impl IntoView {
-    tracing::info!("Welcome to Alexandria!");
-
+fn page() -> impl IntoView {
     let (query, set_query) = create_signal(String::new());
     let fetch_bgg_resources = create_action(move |_: &()| async move {
         let args = to_value(&SearchBGGArgs { query: &query }).unwrap();
         from_value::<Vec<Resource>>(invoke("search_bgg", args).await).map_err(|err| err.to_string())
     });
+
+    view! {
+        <Box style="padding: 0.5em; display: flex; flex-direction: column; align-items: center; overflow-y: scroll; width: 100%; height: 100%;">
+            <Stack spacing=Size::Em(2.0)>
+                <H2>BoardGameGeek</H2>
+                <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(1.0)>
+                    <TextInput get=query set=set_query placeholder="Enter a query ..."/>
+                    <Button color=ButtonColor::Primary on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
+                </Stack>
+                {move || match fetch_bgg_resources.pending().get() {
+                    true => view! { <Skeleton animated=false>"Loading..."</Skeleton> }.into_view(),
+                    false => match fetch_bgg_resources.value().get() {
+                        None => view! {}.into_view(),
+                        Some(Err(error)) => view! { <p>"Error: " {error}</p> }.into_view(),
+                        Some(Ok(resources)) => view! { <Results resources=resources /> }.into_view(),
+                    },
+                }}
+            </Stack>
+        </Box>
+    }
+}
+
+#[component]
+fn sidebar_button(children: Children) -> impl IntoView {
+    view! {
+        <Button style="padding: 12px; border: 0; border-radius: 0; width: 100%; justify-content: left; color: var(--collapsible-header-color); background-color: var(--collapsible-header-background-color);" on_click=move |_| {}>{children()}</Button>
+    }
+}
+
+#[component]
+fn alexandria() -> impl IntoView {
+    tracing::info!("Welcome to Alexandria!");
 
     view! {
         <Meta name="charset" content="UTF-8"/>
@@ -89,33 +119,17 @@ fn alexandria() -> impl IntoView {
         <Title text="Alexandria"/>
 
         <Root default_theme=LeptonicTheme::default()>
-            <Box style="display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-start; width: 100%; min-height: 100vh; overflow: hidden;">
-                <Drawer side=DrawerSide::Left shown=true style="overflow-y: scroll; min-height: 100vh;">
+            <Box style="display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-start; width: 100%; height: 100vh; overflow: hidden;">
+                <Drawer side=DrawerSide::Left shown=true style="overflow-y: scroll; height: 100vh;">
                     <Stack spacing=Size::Em(0.0)>
-                        <Button style="padding: 12px; border: 0; border-radius: 0; width: 100%; justify-content: left; color: var(--collapsible-header-color); background-color: var(--collapsible-header-background-color);" on_click=move |_| {}>Search</Button>
+                        <SidebarButton>Search</SidebarButton>
                         <Collapsible>
                             <CollapsibleHeader slot>"Lists"</CollapsibleHeader>
-                            <CollapsibleBody slot>"Owned"</CollapsibleBody>
+                            <CollapsibleBody slot><SidebarButton >"Owned"</SidebarButton></CollapsibleBody>
                         </Collapsible>
                     </Stack>
                 </Drawer>
-                <Box style="padding: 0.5em; display: flex; flex-direction: column; overflow-y: scroll; width: 100%; height: 100%;">
-                    <Stack spacing=Size::Em(2.0)>
-                        <H2>BoardGameGeek</H2>
-                        <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(1.0)>
-                            <TextInput get=query set=set_query placeholder="Enter a query ..."/>
-                            <Button color=ButtonColor::Primary on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
-                        </Stack>
-                        {move || match fetch_bgg_resources.pending().get() {
-                            true => view! { <Skeleton animated=false>"Loading..."</Skeleton> }.into_view(),
-                            false => match fetch_bgg_resources.value().get() {
-                                None => view! {}.into_view(),
-                                Some(Err(error)) => view! { <p>"Error: " {error}</p> }.into_view(),
-                                Some(Ok(resources)) => view! { <Results resources=resources /> }.into_view(),
-                            },
-                        }}
-                    </Stack>
-                </Box>
+                <Page />
             </Box>
         </Root>
     }
