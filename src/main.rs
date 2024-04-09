@@ -1,6 +1,7 @@
 use leptonic::prelude::*;
 use leptos::*;
 use leptos_meta::{Meta, Title};
+use leptos_router::*;
 use serde::Serialize;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
@@ -118,6 +119,8 @@ fn alexandria() -> impl IntoView {
 
         <Title text="Alexandria"/>
 
+
+        <Router>
         <Root default_theme=LeptonicTheme::default()>
             <Box style="display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-start; width: 100%; height: 100vh; overflow: hidden;">
                 <Drawer side=DrawerSide::Left shown=true style="overflow-y: scroll; height: 100vh;">
@@ -129,9 +132,14 @@ fn alexandria() -> impl IntoView {
                         </Collapsible>
                     </Stack>
                 </Drawer>
-                <Page />
+                <Routes>
+                    <Route path="" view=move || view! { <Page/> }>
+                        <Route path="/" view=move || view! { <Page /> } />
+                    </Route>
+                </Routes>
             </Box>
         </Root>
+        </Router>
     }
 }
 
