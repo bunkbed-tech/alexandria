@@ -72,7 +72,7 @@ fn results(resources: Vec<Resource>) -> impl IntoView {
 }
 
 #[component]
-fn page() -> impl IntoView {
+fn media_list_search() -> impl IntoView {
     let (query, set_query) = create_signal(String::new());
     let fetch_bgg_resources = create_action(move |_: &()| async move {
         let args = to_value(&SearchBGGArgs { query: &query }).unwrap();
@@ -80,21 +80,28 @@ fn page() -> impl IntoView {
     });
 
     view! {
+        <H2>BoardGameGeek</H2>
+        <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(1.0)>
+            <TextInput get=query set=set_query placeholder="Enter a query ..."/>
+            <Button color=ButtonColor::Primary on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
+        </Stack>
+        {move || match fetch_bgg_resources.pending().get() {
+            true => view! { <Skeleton animated=false>"Loading..."</Skeleton> }.into_view(),
+            false => match fetch_bgg_resources.value().get() {
+                None => view! {}.into_view(),
+                Some(Err(error)) => view! { <p>"Error: " {error}</p> }.into_view(),
+                Some(Ok(resources)) => view! { <Results resources=resources /> }.into_view(),
+            },
+        }}
+    }
+}
+
+#[component]
+fn page() -> impl IntoView {
+    view! {
         <Box style="padding: 0.5em; display: flex; flex-direction: column; align-items: center; overflow-y: scroll; width: 100%; height: 100%;">
             <Stack spacing=Size::Em(2.0)>
-                <H2>BoardGameGeek</H2>
-                <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(1.0)>
-                    <TextInput get=query set=set_query placeholder="Enter a query ..."/>
-                    <Button color=ButtonColor::Primary on_click=move |_| fetch_bgg_resources.dispatch(())>Search</Button>
-                </Stack>
-                {move || match fetch_bgg_resources.pending().get() {
-                    true => view! { <Skeleton animated=false>"Loading..."</Skeleton> }.into_view(),
-                    false => match fetch_bgg_resources.value().get() {
-                        None => view! {}.into_view(),
-                        Some(Err(error)) => view! { <p>"Error: " {error}</p> }.into_view(),
-                        Some(Ok(resources)) => view! { <Results resources=resources /> }.into_view(),
-                    },
-                }}
+                <Outlet />
             </Stack>
         </Box>
     }
@@ -104,6 +111,24 @@ fn page() -> impl IntoView {
 fn sidebar_button(children: Children) -> impl IntoView {
     view! {
         <Button style="padding: 12px; border: 0; border-radius: 0; width: 100%; justify-content: left; color: var(--collapsible-header-color); background-color: var(--collapsible-header-background-color);" on_click=move |_| {}>{children()}</Button>
+    }
+}
+
+#[component]
+fn search_page() -> impl IntoView {
+    view! {
+        <MediaListSearch />
+    }
+}
+
+#[component]
+fn owned_page() -> impl IntoView {
+    view! {
+        <Tabs mount=Mount::Once>
+            <Tab name="tab-1" label="Board Games".into_view()><MediaListSearch /></Tab>
+            <Tab name="tab-2" label="Tab 2".into_view()>"Content of tab 2"</Tab>
+            <Tab name="tab-3" label="Tab 3".into_view()>"Content of tab 3"</Tab>
+        </Tabs>
     }
 }
 
@@ -125,16 +150,17 @@ fn alexandria() -> impl IntoView {
             <Box style="display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-start; width: 100%; height: 100vh; overflow: hidden;">
                 <Drawer side=DrawerSide::Left shown=true style="overflow-y: scroll; height: 100vh;">
                     <Stack spacing=Size::Em(0.0)>
-                        <SidebarButton>Search</SidebarButton>
+                        <SidebarButton><a href="/">Search</a></SidebarButton>
                         <Collapsible>
                             <CollapsibleHeader slot>"Lists"</CollapsibleHeader>
-                            <CollapsibleBody slot><SidebarButton >"Owned"</SidebarButton></CollapsibleBody>
+                            <CollapsibleBody slot><SidebarButton><a href="/owned">"Owned"</a></SidebarButton></CollapsibleBody>
                         </Collapsible>
                     </Stack>
                 </Drawer>
                 <Routes>
                     <Route path="" view=move || view! { <Page/> }>
-                        <Route path="/" view=move || view! { <Page /> } />
+                        <Route path="/" view=move || view! { <SearchPage /> } />
+                        <Route path="/owned" view=move || view! { <OwnedPage /> } />
                     </Route>
                 </Routes>
             </Box>
