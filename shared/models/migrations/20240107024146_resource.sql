@@ -4,8 +4,20 @@ CREATE TABLE "resource" (
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   year_published INTEGER,
-  owned BOOLEAN NOT NULL,
-  want_to_own BOOLEAN NOT NULL,
-  want_to_try BOOLEAN NOT NULL,
   thumbnail TEXT NOT NULL
+);
+CREATE TABLE "tag" (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+CREATE TABLE "tagging" (
+  id SERIAL PRIMARY KEY,
+  tag_id INTEGER NOT NULL,
+  resource_id INTEGER NOT NULL,
+  UNIQUE (tag_id, resource_id)
+);
+INSERT INTO "tag" (name) VALUES (
+  'owned',
+  'want to own',
+  'want to try'
 );
