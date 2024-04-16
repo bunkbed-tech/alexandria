@@ -8,7 +8,7 @@ use serde_json::to_string_pretty;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use tauri::{command, State};
 
-use models::Resource;
+use models::{Resource, Tagging};
 
 #[command]
 async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
@@ -66,6 +66,32 @@ async fn list_resources(state: State<'_, PgPoolWrapper>) -> Result<String, Strin
             .expect("Unable to list resources")
     };
     to_string_pretty(&rows).map_err(|err| err.to_string())
+}
+
+#[command]
+async fn save_resource_tagging(
+    resource: Resource,
+    status: bool,
+    state: State<'_, PgPoolWrapper>,
+) -> Result<Resource, String> {
+    let db_resource = sqlx::query_as!(Resource, r#"INSERT INTO resource (title, description, year_published, thumbnail) VALUES ($1, $2, $3, $4) RETURNING *"#)
+        .bind(&resource.title)
+        .bind(&resource.description)
+        .bind(&resource.year_published)
+        .bind(&resource.thumbnail)
+        .fetch_one(&state.pool)
+        .await
+        .map_err(|err| err.to_string())?;
+    let db_tagging = sqlx::query_as!(
+        Tag,
+        r#"INSERT INTO tagging (tag_id, resource_id) VALUES ($1, $2) RETURNING *"#
+    )
+    .bind(1)
+    .bind(&db_resource.id)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|err| err.to_string())?;
+    Ok(db_resource)
 }
 
 struct PgPoolWrapper {
