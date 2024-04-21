@@ -17,7 +17,7 @@ services:
       - 5432:5432
   migrate:
     build:
-      dockerfile: docker/migrate.Dockerfile
+      context: shared/models
     container_name: migrate
     env_file: .env
     environment:
@@ -26,18 +26,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
-  dummy_data:
-    image: postgres:15
-    container_name: dummy_data
-    working_dir: /data
-    env_file: .env
-    environment:
-      PGPASSWORD: $POSTGRES_PASSWORD
-    volumes:
-      - ./shared/models/tests/data:/data
-    command: [ psql, -h, $POSTGRES_HOST, -U, $POSTGRES_USER, -d, $POSTGRES_DB, -f, dummy.sql]
-    depends_on:
-      - migrate
+  # TODO fix dummy data script
+  # dummy_data:
+  #   image: postgres:15
+  #   container_name: dummy_data
+  #   working_dir: /data
+  #   env_file: .env
+  #   environment:
+  #     PGPASSWORD: $POSTGRES_PASSWORD
+  #   volumes:
+  #     - ./shared/models/tests/data:/data
+  #   command: [ psql, -h, $POSTGRES_HOST, -U, $POSTGRES_USER, -d, $POSTGRES_DB, -f, dummy.sql]
+  #   depends_on:
+  #     - migrate
 volumes:
   postgres-data:
   postgres-logs:
