@@ -30,25 +30,30 @@ fn resource_attribute_button(resource: Resource) -> impl IntoView {
     let (owned, set_owned) = create_signal(false);
     let (want_to_own, set_want_to_own) = create_signal(false);
     let (want_to_try, set_want_to_try) = create_signal(false);
-    let save_resource_tagging = create_action(move |_: &()| async move {
-        set_owned.update(|status| *status = !*status);
+    let save_resource_tagging = create_action(|input: &(ReadSignal<bool>, Resource)| {
+        let (status, resource) = input.clone();
         let args = to_value(&SaveResourceTaggingArgs {
-            status: &owned,
+            status: &status,
             resource: &resource,
         })
         .unwrap();
-        from_value::<Resource>(invoke("save_resource_tagging", args).await)
-            .map_err(|err| err.to_string())
+        async move {
+            from_value::<Resource>(invoke("save_resource_tagging", args).await)
+                .map_err(|err| err.to_string())
+        }
     });
 
     view! {
         <Col md=1 sm=1 xs=1 style="justify-content: center;">
             <Stack spacing=Size::Em(0.6) style="justify-content: flex-end;">
                 <img src={&resource.thumbnail} />
-                <p style="max-width: 200px; white-space: nowrap; overflow: hidden; text-align: center; text-overflow: ellipsis;">{resource.title} " (" {resource.year_published} ")"</p>
+                <p style="max-width: 200px; white-space: nowrap; overflow: hidden; text-align: center; text-overflow: ellipsis;">{&resource.title} " (" {resource.year_published} ")"</p>
                 <Stack orientation=StackOrientation::Horizontal spacing=Size::Em(0.3)>
                     <ButtonGroup>
-                        <Button on_click=move |_| save_resource_tagging.dispatch(())>{move || match owned.get() {
+                        <Button on_click=move |_| {
+                            set_owned.update(|status| *status = !*status);
+                            save_resource_tagging.dispatch((owned.clone(), resource.clone()))
+                        }>{move || match owned.get() {
                             true => "Owned",
                             false => "Add to Collection",
                         }}</Button>

@@ -117,7 +117,11 @@ pub async fn run() {
     tauri::Builder::default()
         .manage(PgPoolWrapper { pool })
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![list_resources, search_bgg, save_resource_tagging])
+        .invoke_handler(tauri::generate_handler![
+            list_resources,
+            search_bgg,
+            save_resource_tagging
+        ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
 }
