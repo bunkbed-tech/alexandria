@@ -74,23 +74,29 @@ async fn save_resource_tagging(
     status: bool,
     state: State<'_, PgPoolWrapper>,
 ) -> Result<Resource, String> {
-    let db_resource = sqlx::query_as!(Resource, r#"INSERT INTO resource (title, description, year_published, thumbnail) VALUES ($1, $2, $3, $4) RETURNING *"#)
-        .bind(&resource.title)
-        .bind(&resource.description)
-        .bind(&resource.year_published)
-        .bind(&resource.thumbnail)
+    let db_resource = {
+        sqlx::query_as!(
+            Resource,
+            r#"INSERT INTO resource (title, description, year_published, thumbnail) VALUES ($1, $2, $3, $4) RETURNING *"#,
+            resource.title,
+            resource.description,
+            resource.year_published,
+            resource.thumbnail,
+        ).fetch_one(&state.pool)
+        .await
+        .map_err(|err| err.to_string())?
+    };
+    let db_tagging = {
+        sqlx::query_as!(
+            Tagging,
+            r#"INSERT INTO tagging (tag_id, resource_id) VALUES ($1, $2) RETURNING *"#,
+            1,
+            db_resource.id,
+        )
         .fetch_one(&state.pool)
         .await
-        .map_err(|err| err.to_string())?;
-    let db_tagging = sqlx::query_as!(
-        Tag,
-        r#"INSERT INTO tagging (tag_id, resource_id) VALUES ($1, $2) RETURNING *"#
-    )
-    .bind(1)
-    .bind(&db_resource.id)
-    .fetch_one(&state.pool)
-    .await
-    .map_err(|err| err.to_string())?;
+        .map_err(|err| err.to_string())?
+    };
     Ok(db_resource)
 }
 
@@ -111,7 +117,7 @@ pub async fn run() {
     tauri::Builder::default()
         .manage(PgPoolWrapper { pool })
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![list_resources, search_bgg,])
+        .invoke_handler(tauri::generate_handler![list_resources, search_bgg, save_resource_tagging])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
 }
