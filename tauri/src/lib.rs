@@ -43,7 +43,7 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
         .into_iter()
         .zip(thing_items.item.into_iter())
         .map(|(search, thing)| Resource {
-            id: search.id.parse::<i64>().expect("Not a valid ID"),
+            id: search.id.parse::<i32>().expect("Not a valid ID"),
             title: search.name.value,
             description: "".to_string(),
             year_published: search
