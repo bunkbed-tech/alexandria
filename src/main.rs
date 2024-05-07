@@ -20,8 +20,7 @@ struct SearchBGGArgs<'a> {
 }
 
 #[derive(Serialize)]
-struct SaveResourceTaggingArgs<'a> {
-    status: &'a ReadSignal<bool>,
+struct ToggleResourceOwnedArgs<'a> {
     resource: &'a Resource,
 }
 
@@ -30,17 +29,17 @@ fn resource_attribute_button(resource: Resource) -> impl IntoView {
     let (owned, set_owned) = create_signal(false);
     let (want_to_own, set_want_to_own) = create_signal(false);
     let (want_to_try, set_want_to_try) = create_signal(false);
-    let save_resource_tagging = create_action(|input: &(ReadSignal<bool>, Resource)| {
+    let toggle_resource_owned = create_action(|input: &(ReadSignal<bool>, Resource)| {
         let (status, resource) = input.clone();
-        let args = to_value(&SaveResourceTaggingArgs {
-            status: &status,
+        let cmd = match status.get() {
+            true => "add_resource_owned",
+            false => "delete_resource_owned",
+        };
+        let args = to_value(&ToggleResourceOwnedArgs {
             resource: &resource,
         })
         .unwrap();
-        async move {
-            from_value::<Resource>(invoke("save_resource_tagging", args).await)
-                .map_err(|err| err.to_string())
-        }
+        async move { from_value::<Resource>(invoke(cmd, args).await).map_err(|err| err.to_string()) }
     });
 
     view! {
@@ -52,7 +51,7 @@ fn resource_attribute_button(resource: Resource) -> impl IntoView {
                     <ButtonGroup>
                         <Button on_click=move |_| {
                             set_owned.update(|status| *status = !*status);
-                            save_resource_tagging.dispatch((owned.clone(), resource.clone()))
+                            toggle_resource_owned.dispatch((owned.clone(), resource.clone()))
                         }>{move || match owned.get() {
                             true => "Owned",
                             false => "Add to Collection",

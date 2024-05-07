@@ -16,7 +16,7 @@ INSERT INTO "tag" (name) VALUES
   ('want to try');
 CREATE TABLE "tagging" (
   id SERIAL PRIMARY KEY,
-  tag_id INTEGER NOT NULL,
-  resource_id INTEGER NOT NULL,
+  tag_id INTEGER NOT NULL REFERENCES tag (id),
+  resource_id INTEGER NOT NULL REFERENCES resource (id),
   UNIQUE (tag_id, resource_id)
 );

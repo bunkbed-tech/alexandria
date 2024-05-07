@@ -69,9 +69,24 @@ async fn list_resources(state: State<'_, PgPoolWrapper>) -> Result<String, Strin
 }
 
 #[command]
-async fn save_resource_tagging(
+async fn delete_resource_owned(
     resource: Resource,
-    status: bool,
+    state: State<'_, PgPoolWrapper>,
+) -> Result<Resource, String> {
+    sqlx::query_as!(
+        Resource,
+        r#"DELETE FROM resource WHERE title = $1"#,
+        resource.title,
+    )
+    .execute(&state.pool)
+    .await
+    .map_err(|err| err.to_string())?;
+    Ok(resource)
+}
+
+#[command]
+async fn add_resource_owned(
+    resource: Resource,
     state: State<'_, PgPoolWrapper>,
 ) -> Result<Resource, String> {
     let db_resource = {
@@ -120,7 +135,8 @@ pub async fn run() {
         .invoke_handler(tauri::generate_handler![
             list_resources,
             search_bgg,
-            save_resource_tagging
+            add_resource_owned,
+            delete_resource_owned,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
