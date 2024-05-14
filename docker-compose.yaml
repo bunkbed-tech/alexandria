@@ -17,7 +17,7 @@ services:
       - 5432:5432
   migrate:
     build:
-      context: shared/models
+      context: src-tauri
     container_name: migrate
     env_file: .env
     environment:

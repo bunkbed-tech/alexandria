@@ -1,5 +1,4 @@
 {
-  description = "Media tracker in Tauri + SolidJS";
   inputs = {
     canivete.url = github:schradert/canivete;
     # Compose rust toolchains
@@ -15,9 +14,9 @@
         ...
       }:
         with nix; {
-          canivete.pre-commit.rust.enable = true;
-          devShells.alexandria = pkgs.mkShell {
-            packages = let
+          canivete = {
+            devShell.name = "alex";
+            devShell.packages = let
               toolchain = with inputs.fenix.packages.${system};
                 combine (flatten [
                   (with stable; [cargo rustc rust-src])
@@ -28,6 +27,7 @@
               flatten [
                 toolchain
                 (with pkgs; [
+                  bun
                   trunk
                   wasm-bindgen-cli
                   ((cargo-tauri.override {
@@ -62,6 +62,17 @@
                   ]))
                 ])
               ];
+            pre-commit = {
+              settings.excludes = ["old/"];
+              languages.javascript.enable = true;
+              # Also run biome on .svelte files
+              settings.hooks.biome.types_or = ["svelte"];
+              # Allow arbitrary line length in markdown (paragraph wrapping preferred)
+              settings.hooks.markdownlint.settings.configuration.MD013.line_length = -1;
+              # Remap sveltekit assets to correct folder for static link checking
+              # Exclude hardcoded localhost links
+              settings.hooks.lychee.settings.flags = "--exclude localhost --remap 'src/%25sveltekit.assets%25 static'";
+            };
           };
         };
     };
