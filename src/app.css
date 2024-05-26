@@ -4,67 +4,131 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 20 14.3% 4.1%;
+    --bg_dim: #f2e5bc;
+    --bg0: #fbf1c7;
+    --bg1: #f4e8be;
+    --bg2: #f2e5bc;
+    --bg3: #eee0b7;
+    --bg4: #e5d5ad;
+    --bg5: #ddccab;
+    --bg_statusline1: #f2e5bc;
+    --bg_statusline2: #f2e5bc;
+    --bg_statusline3: #e5d5ad;
+    --bg_diff_green: #e6eabc;
+    --bg_visual_green: #dee2b6;
+    --bg_diff_red: #f9e0bb;
+    --bg_visual_red: #f1d9b5;
+    --bg_diff_blue: #e2e6c7;
+    --bg_visual_blue: #dadec0;
+    --bg_visual_yellow: #fae7b3;
+    --bg_current_word: #f2e5bc;
+    --fg0: #654735;
+    --fg1: #4f3829;
+    --red: #c14a4a;
+    --orange: #c35e0a;
+    --yellow: #b47109;
+    --green: #6c782e;
+    --aqua: #4c7a5d;
+    --blue: #45707a;
+    --purple: #945e80;
+    --bg_red: #ae5858;
+    --bg_green: #6f8352;
+    --bg_yellow: #a96b2c;
 
-    --muted: 60 4.8% 95.9%;
-    --muted-foreground: 25 5.3% 44.7%;
+    --background: var(--bg0);
+    --foreground: var(--fg0);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 20 14.3% 4.1%;
+    --muted: var(--bg0);
+    --muted-foreground: var(--fg0);
 
-    --card: 0 0% 100%;
-    --card-foreground: 20 14.3% 4.1%;
+    --popover: var(--bg0);
+    --popover-foreground: var(--fg0)
 
-    --border: 20 5.9% 90%;
-    --input: 20 5.9% 90%;
+    --card: var(--bg0);
+    --card-foreground: var(--fg0);
 
-    --primary: 24 9.8% 10%;
-    --primary-foreground: 60 9.1% 97.8%;
+    --border: var(--purple);
+    --input: var(--bg_current_word);
 
-    --secondary: 60 4.8% 95.9%;
-    --secondary-foreground: 24 9.8% 10%;
+    --primary: var(--orange);
+    --primary-foreground: var(--bg_visual_blue);
 
-    --accent: 60 4.8% 95.9%;
-    --accent-foreground: 24 9.8% 10%;
+    --secondary: var(--blue);
+    --secondary-foreground: var(--aqua);
 
-    --destructive: 0 72.2% 50.6%;
-    --destructive-foreground: 60 9.1% 97.8%;
+    --accent: var(--bg_yellow);
+    --accent-foreground: var(--yellow);
 
-    --ring: 20 14.3% 4.1%;
+    --destructive: var(--bg_red);
+    --destructive-foreground: var(--red);
+
+    --ring: var(--green);
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 60 9.1% 97.8%;
+    --bg_dim: #1b1b1b;
+    --bg0: #282828;
+    --bg1: #32302f;
+    --bg2: #32302f;
+    --bg3: #45403d;
+    --bg4: #45403d;
+    --bg5: #5a524c;
+    --bg_statusline1: #32302f;
+    --bg_statusline2: #3a3735;
+    --bg_statusline3: #504945;
+    --bg_diff_green: #34381b;
+    --bg_visual_green: #3b4439;
+    --bg_diff_red: #402120;
+    --bg_visual_red: #4c3432;
+    --bg_diff_blue: #0e363e;
+    --bg_visual_blue: #374141;
+    --bg_visual_yellow: #4f422e;
+    --bg_current_word: #3c3836;
+    --fg0: #d4be98;
+    --fg1: #ddc7a1;
+    --red: #ea6962;
+    --orange: #e78a4e;
+    --yellow: #d8a657;
+    --green: #a9b665;
+    --aqua: #89b482;
+    --blue: #7daea3;
+    --purple: #d3869b;
+    --bg_red: #ea6962;
+    --bg_green: #a9b665;
+    --bg_yellow: #d8a657;
 
-    --muted: 12 6.5% 15.1%;
-    --muted-foreground: 24 5.4% 63.9%;
+    --background: var(--bg0);
+    --foreground: var(--fg0);
 
-    --popover: 20 14.3% 4.1%;
-    --popover-foreground: 60 9.1% 97.8%;
+    --muted: var(--bg0);
+    --muted-foreground: var(--fg0);
 
-    --card: 20 14.3% 4.1%;
-    --card-foreground: 60 9.1% 97.8%;
+    --popover: var(--bg0);
+    --popover-foreground: var(--fg0)
 
-    --border: 12 6.5% 15.1%;
-    --input: 12 6.5% 15.1%;
+    --card: var(--bg0);
+    --card-foreground: var(--fg0);
 
-    --primary: 60 9.1% 97.8%;
-    --primary-foreground: 24 9.8% 10%;
+    --border: var(--purple);
+    --input: var(--bg_current_word);
 
-    --secondary: 12 6.5% 15.1%;
-    --secondary-foreground: 60 9.1% 97.8%;
+    --primary: var(--orange);
+    --primary-foreground: var(--bg_visual_blue);
 
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 60 9.1% 97.8%;
+    --secondary: var(--blue);
+    --secondary-foreground: var(--aqua);
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 60 9.1% 97.8%;
+    --accent: var(--bg_yellow);
+    --accent-foreground: var(--yellow);
 
-    --ring: 24 5.7% 82.9%;
+    --destructive: var(--bg_red);
+    --destructive-foreground: var(--red);
+
+    --ring: var(--green);
+
+    --radius: 0.5rem;
   }
 }
 
