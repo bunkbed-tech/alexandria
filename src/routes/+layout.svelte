@@ -7,7 +7,7 @@ let open = false
 </script>
 
 <div class="h-screen w-screen flex">
-  <aside class="w-[20%] border-r-[3px] bg-primary text-secondary">
+  <aside class="w-[20%] border-r-[3px] bg-primary">
     <button class="flex w-full justify-between p-3">
       <a href="/">Search</a>
       <Search />
@@ -23,9 +23,10 @@ let open = false
       </Collapsible.Trigger>
       <Collapsible.Content>
         <div class="w-full p-3 pl-6"><a href="/owned">Owned</a></div>
-        <div class="w-full p-3 pl-6"><a href="/owned">Owned</a></div>
       </Collapsible.Content>
     </Collapsible.Root>
   </aside>
-  <slot></slot>
+  <main class="w-full h-full overflow-y-scroll p-2">
+    <slot></slot>
+  </main>
 </div>
