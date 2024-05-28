@@ -6,7 +6,7 @@ pub struct Resource {
     pub title: String,
     pub description: String,
     pub year_published: Option<i32>,
-    pub thumbnail: String,
+    pub thumbnail: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash)]

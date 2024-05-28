@@ -3,7 +3,7 @@ export class Resource {
     public title!: string
     public description!: string
     public year_published?: number
-    public thumbnail!: string
+    public thumbnail?: string
 }
 
 export class Tag {

@@ -55,7 +55,7 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
             year_published: search
                 .yearpublished
                 .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
-            thumbnail: thing.thumbnail.value,
+            thumbnail: thing.thumbnail.map(|thumbnail| thumbnail.value),
         })
         .collect::<HashSet<_>>()
         .into_iter()
@@ -176,7 +176,7 @@ struct Thumbnail {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 struct ThingItem {
-    thumbnail: Thumbnail,
+    thumbnail: Option<Thumbnail>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -243,14 +243,14 @@ mod tests {
                 title: String::from("Cranium Cadoo"),
                 description: String::from(""),
                 year_published: Some(2001),
-                thumbnail: String::from("https://cf.geekdo-images.com/hQI6W-7HwKty4c5yLFP-Aw__thumb/img/_IyE4nIyGh7_PVfGCarLoNmDMGc=/fit-in/200x150/filters:strip_icc()/pic3335930.jpg"),
+                thumbnail: Some(String::from("https://cf.geekdo-images.com/hQI6W-7HwKty4c5yLFP-Aw__thumb/img/_IyE4nIyGh7_PVfGCarLoNmDMGc=/fit-in/200x150/filters:strip_icc()/pic3335930.jpg")),
             },
             Resource {
                 id: 14454,
                 title: String::from("Cranium Cadoo Booster Box"),
                 description: String::from(""),
                 year_published: Some(2001),
-                thumbnail: String::from("https://cf.geekdo-images.com/jboSqbHm5jcQp7XJZPM-vw__thumb/img/v6dQ2IqIdGJIX19AVEZDSaQ5Nms=/fit-in/200x150/filters:strip_icc()/pic58689.jpg"),
+                thumbnail: Some(String::from("https://cf.geekdo-images.com/jboSqbHm5jcQp7XJZPM-vw__thumb/img/v6dQ2IqIdGJIX19AVEZDSaQ5Nms=/fit-in/200x150/filters:strip_icc()/pic58689.jpg")),
             },
         ];
         assert_eq!(resources, rresources);
