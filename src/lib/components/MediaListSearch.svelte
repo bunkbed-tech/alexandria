@@ -13,10 +13,7 @@ let promise: Promise<Resource[]>
 async function fetchBggResources() {
   const api_resources = await invoke<Resource[]>("search_bgg", { query })
   const db_resources = await invoke<Resource[]>("list_resources", { resources: api_resources })
-  const bgg_to_db_id = db_resources.reduce((obj, resource) => {
-    obj[resource.bgg_id] = resource.id
-    return obj
-  }, {})
+  const bgg_to_db_id = db_resources.reduce((acc, resource) => acc.set(resource.bgg_id, resource.id), new Map())
   return api_resources.map(resource => ({ ...resource, id: bgg_to_db_id[resource.bgg_id] }))
 }
 </script>
