@@ -2,11 +2,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Resource {
-    pub id: i32,
+    pub id: Option<i32>,
     pub title: String,
     pub description: String,
     pub year_published: Option<i32>,
     pub thumbnail: Option<String>,
+    pub bgg_id: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash)]

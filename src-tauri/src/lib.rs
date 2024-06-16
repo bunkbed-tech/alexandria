@@ -49,13 +49,14 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
         .into_iter()
         .zip(thing_items.item.into_iter())
         .map(|(search, thing)| Resource {
-            id: search.id.parse::<i32>().expect("Not a valid ID"),
+            id: None,
             title: search.name.value,
             description: "".to_string(),
             year_published: search
                 .yearpublished
                 .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
             thumbnail: thing.thumbnail.map(|thumbnail| thumbnail.value),
+            bgg_id: search.id.parse::<i32>().expect("Not a valid ID"),
         })
         .collect::<HashSet<_>>()
         .into_iter()
@@ -64,14 +65,23 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
 }
 
 #[command]
-async fn list_resources(state: State<'_, PgPoolWrapper>) -> Result<String, String> {
-    let rows: Vec<Resource> = {
-        sqlx::query_as!(Resource, r#"SELECT * FROM resource"#)
+async fn list_resources(
+    state: State<'_, PgPoolWrapper>,
+    resources: Option<Vec<Resource>>,
+) -> Result<Vec<Resource>, String> {
+    let rows: Vec<Resource>;
+    if let Some(api_resources) = resources {
+        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#, &api_resources.iter().map(|resource| resource.bgg_id).collect::<Vec<i32>>())
             .fetch_all(&state.pool)
             .await
             .expect("Unable to list resources")
-    };
-    to_string_pretty(&rows).map_err(|err| err.to_string())
+    } else {
+        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource"#)
+            .fetch_all(&state.pool)
+            .await
+            .expect("Unable to list resources")
+    }
+    Ok(rows)
 }
 
 #[command]
@@ -98,11 +108,12 @@ async fn add_resource_owned(
     let db_resource = {
         sqlx::query_as!(
             Resource,
-            r#"INSERT INTO resource (title, description, year_published, thumbnail) VALUES ($1, $2, $3, $4) RETURNING *"#,
+            r#"INSERT INTO resource (title, description, year_published, thumbnail, bgg_id) VALUES ($1, $2, $3, $4, $5) RETURNING *"#,
             resource.title,
             resource.description,
             resource.year_published,
             resource.thumbnail,
+            resource.bgg_id,
         ).fetch_one(&state.pool)
         .await
         .map_err(|err| err.to_string())?

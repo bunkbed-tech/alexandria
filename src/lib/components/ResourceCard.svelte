@@ -17,7 +17,7 @@ export let resource: Resource
   <Combobox.Root multiple>
     <div class="relative">
       <!-- <Bookmark class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" /> -->
-      <Bookmark fill={owned ? "var(--foreground)" : "none"} class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" />
+      <Bookmark fill={resource.id !== undefined ? "var(--foreground)" : "none"} class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" />
       <Combobox.Input
         class="inline-flex h-input w-[296px] truncate rounded-9px border rounded-xl border-border-input bg-background px-11 py-3 text-sm transition-colors placeholder:text-foreground-alt/50 focus:outline-none focus:ring-2 focus:ring-foreground focus:ring-offset-2 focus:ring-offset-background"
         placeholder="Search lists"

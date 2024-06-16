@@ -4,7 +4,8 @@ CREATE TABLE "resource" (
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   year_published INTEGER,
-  thumbnail TEXT NOT NULL
+  thumbnail TEXT NOT NULL,
+  bgg_id INTEGER NOT NULL UNIQUE
 );
 CREATE TABLE "tag" (
   id SERIAL PRIMARY KEY,

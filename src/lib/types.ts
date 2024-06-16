@@ -1,9 +1,10 @@
 export class Resource {
-  public id!: number
+  public id?: number
   public title!: string
   public description!: string
   public year_published?: number
   public thumbnail?: string
+  public bgg_id!: number
 }
 
 export class Tag {

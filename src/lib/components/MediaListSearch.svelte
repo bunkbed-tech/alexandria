@@ -10,14 +10,20 @@ import { Resource } from "$lib/types"
 let query = ""
 let promise: Promise<Resource[]>
 
-function fetchBggResources() {
-  promise = invoke<Resource[]>("search_bgg", { query })
+async function fetchBggResources() {
+  const api_resources = await invoke<Resource[]>("search_bgg", { query })
+  const db_resources = await invoke<Resource[]>("list_resources", { resources: api_resources })
+  const bgg_to_db_id = db_resources.reduce((obj, resource) => {
+    obj[resource.bgg_id] = resource.id
+    return obj
+  }, {})
+  return api_resources.map(resource => ({ ...resource, id: bgg_to_db_id[resource.bgg_id] }))
 }
 </script>
 
 <div class="flex flex-col items-center">
   <h2>BoardGameGeek</h2>
-  <form class="flex gap-4" on:submit={fetchBggResources}>
+  <form class="flex gap-4" on:submit={() => promise = fetchBggResources()}>
       <Input bind:value={query} placeholder="Enter a query ..." />
       <Button type="submit">Search</Button>
   </form>
