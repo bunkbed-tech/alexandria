@@ -1,14 +1,23 @@
 <script lang="ts">
+import { invoke } from "@tauri-apps/api/core"
 import { Bookmark, Check, ChevronsUpDown } from "lucide-svelte"
 
+import { Button } from "$lib/components/ui/button"
 import * as Combobox from "$lib/components/ui/combobox"
 import { Resource } from "$lib/types"
+
+export let resource: Resource
+
+$: tracked = resource.id !== undefined
 
 let owned = false
 let wantToOwn = false
 let wantToTry = false
 
-export let resource: Resource
+async function toggleTrackResource() {
+  const command = tracked ? "delete_resource_owned" : "add_resource_owned"
+  resource = await invoke<Resource>(command, { resource })
+}
 </script>
 
 <div class="flex flex-col gap-3 justify-end">
@@ -17,7 +26,9 @@ export let resource: Resource
   <Combobox.Root multiple>
     <div class="relative">
       <!-- <Bookmark class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" /> -->
-      <Bookmark fill={resource.id !== undefined ? "var(--foreground)" : "none"} class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" />
+      <Button on:click={toggleTrackResource} size="icon" class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground bg-transparent">
+        <Bookmark fill={tracked ? "var(--foreground)" : "none"} />
+      </Button>
       <Combobox.Input
         class="inline-flex h-input w-[296px] truncate rounded-9px border rounded-xl border-border-input bg-background px-11 py-3 text-sm transition-colors placeholder:text-foreground-alt/50 focus:outline-none focus:ring-2 focus:ring-foreground focus:ring-offset-2 focus:ring-offset-background"
         placeholder="Search lists"

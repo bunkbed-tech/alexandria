@@ -86,17 +86,18 @@ async fn list_resources(
 
 #[command]
 async fn delete_resource_owned(
-    resource: Resource,
+    mut resource: Resource,
     state: State<'_, PgPoolWrapper>,
 ) -> Result<Resource, String> {
     sqlx::query_as!(
         Resource,
-        r#"DELETE FROM resource WHERE title = $1"#,
-        resource.title,
+        r#"DELETE FROM resource WHERE id = $1"#,
+        resource.id,
     )
     .execute(&state.pool)
     .await
     .map_err(|err| err.to_string())?;
+    resource.id = None;
     Ok(resource)
 }
 
