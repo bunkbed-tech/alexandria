@@ -85,7 +85,7 @@ async fn list_resources(
 }
 
 #[command]
-async fn delete_resource_owned(
+async fn untrack_resource(
     mut resource: Resource,
     state: State<'_, PgPoolWrapper>,
 ) -> Result<Resource, String> {
@@ -102,7 +102,7 @@ async fn delete_resource_owned(
 }
 
 #[command]
-async fn add_resource_owned(
+async fn track_resource(
     resource: Resource,
     state: State<'_, PgPoolWrapper>,
 ) -> Result<Resource, String> {
@@ -154,8 +154,8 @@ pub async fn run() {
             greet,
             list_resources,
             search_bgg,
-            add_resource_owned,
-            delete_resource_owned,
+            track_resource,
+            untrack_resource,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

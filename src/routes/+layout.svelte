@@ -14,7 +14,7 @@ let open = false
     </button>
     <Collapsible.Root bind:open>
       <Collapsible.Trigger class="flex w-full justify-between p-3">
-        Lists
+        <a href="/tracked">Tracked</a>
         {#if open}
           <ChevronUp />
         {:else}
@@ -22,7 +22,7 @@ let open = false
         {/if}
       </Collapsible.Trigger>
       <Collapsible.Content>
-        <div class="w-full p-3 pl-6"><a href="/owned">Owned</a></div>
+        <!-- <div class="w-full p-3 pl-6"><a href="/tracked">Tracked</a></div> -->
       </Collapsible.Content>
     </Collapsible.Root>
   </aside>

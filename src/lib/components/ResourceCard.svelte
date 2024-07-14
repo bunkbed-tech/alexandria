@@ -9,13 +9,11 @@ import { Resource } from "$lib/types"
 export let resource: Resource
 
 $: tracked = resource.id !== undefined
-
-let owned = false
 let wantToOwn = false
 let wantToTry = false
 
 async function toggleTrackResource() {
-  const command = tracked ? "delete_resource_owned" : "add_resource_owned"
+  const command = tracked ? "untrack_resource" : "track_resource"
   resource = await invoke<Resource>(command, { resource })
 }
 </script>
@@ -37,8 +35,8 @@ async function toggleTrackResource() {
       <ChevronsUpDown class="absolute end-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" />
     </div>
     <Combobox.Content sideOffset={8} class="w-full rounded-xl border border-muted bg-primary px-1 py-3 shadow-popover outline-none">
-      <Combobox.Item class="flex h-10 w-full select-none items-center rounded-xl rounded-button py-3 pl-5 pr-1.5 text-sm capitalize outline-none transition-all duration-75 data-[highlighted]:bg-muted" on:click={() => owned = !owned}>
-        {owned ? "Owned" : "Add to Collection"}
+      <Combobox.Item class="flex h-10 w-full select-none items-center rounded-xl rounded-button py-3 pl-5 pr-1.5 text-sm capitalize outline-none transition-all duration-75 data-[highlighted]:bg-muted" on:click={() => tracked = !tracked}>
+        {tracked ? "Tracked" : "Add to Collection"}
         <Combobox.ItemIndicator class="ml-auto" asChild={false}><Check /></Combobox.ItemIndicator>
       </Combobox.Item>
       <Combobox.Item class="flex h-10 w-full select-none items-center rounded-xl rounded-button py-3 pl-5 pr-1.5 text-sm capitalize outline-none transition-all duration-75 data-[highlighted]:bg-muted" on:click={() => wantToOwn = !wantToOwn}>
