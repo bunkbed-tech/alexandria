@@ -8,9 +8,9 @@ import { Resource } from "$lib/types"
 
 export let resource: Resource
 
-$: tracked = resource.id !== undefined
 let wantToOwn = false
 let wantToTry = false
+$: tracked = resource.id != undefined
 
 async function toggleTrackResource() {
   const command = tracked ? "untrack_resource" : "track_resource"
