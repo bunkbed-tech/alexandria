@@ -1,6 +1,7 @@
 <script lang="ts">
 import { invoke } from "@tauri-apps/api/core"
 import { Bookmark, Check, ChevronsUpDown } from "lucide-svelte"
+import { createEventDispatcher } from "svelte"
 
 import { Button } from "$lib/components/ui/button"
 import * as Combobox from "$lib/components/ui/combobox"
@@ -10,11 +11,14 @@ export let resource: Resource
 
 let wantToOwn = false
 let wantToTry = false
+const dispatch = createEventDispatcher()
+
 $: tracked = resource.id != undefined
 
 async function toggleTrackResource() {
   const command = tracked ? "untrack_resource" : "track_resource"
   resource = await invoke<Resource>(command, { resource })
+  dispatch("toggle", {})
 }
 </script>
 
