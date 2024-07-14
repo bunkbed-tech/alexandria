@@ -119,17 +119,6 @@ async fn track_resource(
         .await
         .map_err(|err| err.to_string())?
     };
-    let db_tagging = {
-        sqlx::query_as!(
-            Tagging,
-            r#"INSERT INTO tagging (tag_id, resource_id) VALUES ($1, $2) RETURNING *"#,
-            1,
-            db_resource.id,
-        )
-        .fetch_one(&state.pool)
-        .await
-        .map_err(|err| err.to_string())?
-    };
     Ok(db_resource)
 }
 
