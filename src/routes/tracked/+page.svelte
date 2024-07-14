@@ -1,6 +1,6 @@
 <script lang="ts">
 import { invoke } from "@tauri-apps/api/core"
- import { onMount } from "svelte"
+import { onMount } from "svelte"
 
 import ResourceCards from "$lib/components/ResourceCards.svelte"
 import * as Tabs from "$lib/components/ui/tabs"
@@ -9,7 +9,7 @@ import { Resource } from "$lib/types"
 let promise: Promise<Resource[]>
 
 function queryTrackedResources() {
-   promise = invoke<Resource[]>("list_resources", { resources: null })
+  promise = invoke<Resource[]>("list_resources", { resources: null })
 }
 
 onMount(queryTrackedResources)
