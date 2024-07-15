@@ -36,3 +36,19 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+## Todo
+
+1. [ ] Retain state in app between navigation
+2. [ ] Fix up list creation buttons
+3. [ ] make ResourceCard look good (hover, grid spacing, photo sizes)
+4. [ ] Add more APIs
+5. [ ] Sorting BGG API results by bgg_id
+6. [ ] Filtering, sorting, search on list pages
+7. [ ] Package standalone release with database
+
+## v2 Todos
+
+1. [ ] Server-client architecture
+2. [ ] Self-hosted templates or packages (k8s, docker, etc., NIX)
+3. [ ] Mobile app
