@@ -46,6 +46,7 @@ You can preview the production build with `npm run preview`.
 5. [ ] Sorting BGG API results by bgg_id
 6. [ ] Filtering, sorting, search on list pages
 7. [ ] Package standalone release with database
+8. [ ] Make combobox options dynamic
 
 ## v2 Todos
 

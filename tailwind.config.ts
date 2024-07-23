@@ -57,6 +57,15 @@ const config: Config = {
       fontFamily: {
         sans: [...fontFamily.sans],
       },
+      keyframes: {
+        marquee: {
+          "0%": { transform: "translateY(0%)" },
+          "100%": { transform: "translateY(-100%)" },
+        },
+      },
+      animation: {
+        marquee: "marquee 5s linear infinite",
+      },
     },
   },
 }
