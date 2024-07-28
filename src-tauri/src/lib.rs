@@ -225,9 +225,9 @@ mod tests {
         let iitems = ThingItems {
             item: vec![
                 ThingItem {
-                    thumbnail: Thumbnail {
+                    thumbnail: Some(Thumbnail {
                         value: String::from("https://cf.geekdo-images.com/hHZWXnUTMYDd_KTAM6Jwlw__thumb/img/O5XHaPOALYquS058qcXWVm5b_k4=/fit-in/200x150/filters:strip_icc()/pic3759421.jpg"),
-                    },
+                    }),
                 },
             ],
         };
@@ -240,14 +240,16 @@ mod tests {
         let resources = search_bgg(query).await.unwrap();
         let rresources = vec![
             Resource {
-                id: 6420,
+                id: None,
+                bgg_id: 6420,
                 title: String::from("Cranium Cadoo"),
                 description: String::from(""),
                 year_published: Some(2001),
                 thumbnail: Some(String::from("https://cf.geekdo-images.com/hQI6W-7HwKty4c5yLFP-Aw__thumb/img/_IyE4nIyGh7_PVfGCarLoNmDMGc=/fit-in/200x150/filters:strip_icc()/pic3335930.jpg")),
             },
             Resource {
-                id: 14454,
+                id: None,
+                bgg_id: 14454,
                 title: String::from("Cranium Cadoo Booster Box"),
                 description: String::from(""),
                 year_published: Some(2001),
