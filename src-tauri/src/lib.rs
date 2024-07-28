@@ -23,11 +23,11 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
         query
     ))
     .await
-    .map_err(|err| err.to_string())?
+    .map_err(|err| String::from("[search_bgg:search_xml:get] ") + &err.to_string())?
     .text()
     .await
-    .map_err(|err| err.to_string())?;
-    let search_items: SearchItems = from_str(&search_xml).map_err(|err| err.to_string())?;
+    .map_err(|err| String::from("[search_bgg:search_xml:text] ") + &err.to_string())?;
+    let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string())?;
     let ids = search_items
         .item
         .clone()
@@ -39,11 +39,11 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
         ids.join(",")
     ))
     .await
-    .map_err(|err| err.to_string())?
+    .map_err(|err| String::from("[search_bgg:thing_xml:get] ") + &err.to_string())?
     .text()
     .await
-    .map_err(|err| err.to_string())?;
-    let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| err.to_string())?;
+    .map_err(|err| String::from("[search_bgg:thing_xml:get] ") + &err.to_string())?;
+    let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[search_bgg:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
     let resources = search_items
         .item
         .into_iter()
@@ -96,7 +96,7 @@ async fn untrack_resource(
     )
     .execute(&state.pool)
     .await
-    .map_err(|err| err.to_string())?;
+    .map_err(|err| String::from("[untrack_resource:_:execute] ") + &err.to_string())?;
     resource.id = None;
     Ok(resource)
 }
@@ -117,7 +117,7 @@ async fn track_resource(
             resource.bgg_id,
         ).fetch_one(&state.pool)
         .await
-        .map_err(|err| err.to_string())?
+        .map_err(|err| String::from("[track_resource:db_resource:fetch_one] ") + &err.to_string())?
     };
     Ok(db_resource)
 }
