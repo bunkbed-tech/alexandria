@@ -4,20 +4,14 @@ use std::env::var;
 use quick_xml::de::from_str;
 use reqwest::get;
 use serde::{Deserialize, Serialize};
-use serde_json::to_string_pretty;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use tauri::{command, State};
 
 mod models;
-use crate::models::{Resource, Tagging};
+use crate::models::Resource;
 
 #[command]
-fn greet(name: String) -> String {
-    format!("Hello, {}!", name)
-}
-
-#[command]
-async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
+async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
     let search_xml = get(format!(
         "https://boardgamegeek.com/xmlapi2/search?query={}",
         query
@@ -32,31 +26,42 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
         .item
         .clone()
         .into_iter()
-        .map(|item| item.id)
-        .collect::<Vec<String>>();
+        .map(|item| item.id.parse::<i32>().expect("Not a valid ID"))
+        .collect::<Vec<i32>>();
+    Ok(ids)
+}
+
+#[command]
+async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
     let thing_xml = get(format!(
         "https://boardgamegeek.com/xmlapi2/thing?id={}",
-        ids.join(",")
+        ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
     ))
     .await
-    .map_err(|err| String::from("[search_bgg:thing_xml:get] ") + &err.to_string())?
+    .map_err(|err| String::from("[list_bgg_things:thing_xml:get] ") + &err.to_string())?
     .text()
     .await
-    .map_err(|err| String::from("[search_bgg:thing_xml:get] ") + &err.to_string())?;
-    let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[search_bgg:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
-    let resources = search_items
+    .map_err(|err| String::from("[list_bgg_things:thing_xml:text] ") + &err.to_string())?;
+    let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
+    let resources = thing_items
         .item
         .into_iter()
-        .zip(thing_items.item.into_iter())
-        .map(|(search, thing)| Resource {
+        .zip(ids)
+        .map(|(thing, id)| Resource {
             id: None,
-            title: search.name.value,
-            description: "".to_string(),
-            year_published: search
+            title: thing
+                .name
+                .iter()
+                .filter(|name| name.name_type == NameType::Primary)
+                .next()
+                .map(|name| name.value.clone())
+                .expect("Primary name does not exist"),
+            description: thing.description.map(|description| description.value),
+            year_published: thing
                 .yearpublished
                 .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
             thumbnail: thing.thumbnail.map(|thumbnail| thumbnail.value),
-            bgg_id: search.id.parse::<i32>().expect("Not a valid ID"),
+            bgg_id: id,
         })
         .collect::<HashSet<_>>()
         .into_iter()
@@ -67,11 +72,11 @@ async fn search_bgg(query: String) -> Result<Vec<Resource>, String> {
 #[command]
 async fn list_resources(
     state: State<'_, PgPoolWrapper>,
-    resources: Option<Vec<Resource>>,
+    ids: Option<Vec<i32>>,
 ) -> Result<Vec<Resource>, String> {
     let rows: Vec<Resource>;
-    if let Some(api_resources) = resources {
-        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#, &api_resources.iter().map(|resource| resource.bgg_id).collect::<Vec<i32>>())
+    if let Some(bgg_ids) = ids {
+        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#, &bgg_ids)
             .fetch_all(&state.pool)
             .await
             .expect("Unable to list resources")
@@ -140,9 +145,9 @@ pub async fn run() {
         .manage(PgPoolWrapper { pool })
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
-            greet,
             list_resources,
             search_bgg,
+            list_bgg_things,
             track_resource,
             untrack_resource,
         ])
@@ -160,8 +165,6 @@ struct Attribute {
 struct SearchItem {
     #[serde(rename = "@id")]
     id: String,
-    name: Attribute,
-    yearpublished: Option<Attribute>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -170,14 +173,32 @@ struct SearchItems {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-struct Thumbnail {
+struct InnerText {
     #[serde(rename = "$text")]
     value: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[serde(rename_all = "snake_case")]
+enum NameType {
+    Primary,
+    Alternate,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+struct NameAttribute {
+    #[serde(rename = "@value")]
+    value: String,
+    #[serde(rename = "@type")]
+    name_type: NameType,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 struct ThingItem {
-    thumbnail: Option<Thumbnail>,
+    description: Option<InnerText>,
+    thumbnail: Option<InnerText>,
+    yearpublished: Option<Attribute>,
+    name: Vec<NameAttribute>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
