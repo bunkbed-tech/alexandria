@@ -1,6 +1,9 @@
-{inputs, nix, ...}: {
+{
+  inputs,
+  nix,
+  ...
+}: {
   perSystem = {
-    nix,
     pkgs,
     system,
     ...

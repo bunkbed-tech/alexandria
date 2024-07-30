@@ -1,7 +1,13 @@
 {config, ...}: let
   inherit (config.alexandria) postgres;
 in {
-  perSystem = {inputs', nix, pkgs, self', ...}: {
+  perSystem = {
+    inputs',
+    nix,
+    pkgs,
+    self',
+    ...
+  }: {
     packages.alexandria-migrations = let
       inherit (inputs'.fenix.packages.stable) toolchain;
       sqlx-cli = pkgs.sqlx-cli.override {
@@ -12,9 +18,10 @@ in {
       };
       migrations = pkgs.linkFarm "migrations" {migrations = ./migrations;};
       srcs = [toolchain sqlx-cli migrations];
-    in pkgs.wrapProgram srcs "migrate" "cargo" "--add-flags \"sqlx migrate run\"" {
-      passthru.local = pkgs.wrapFlags self'.packages.alexandria-migrations "--set DATABASE_URL=${postgres.local.url}";
-    };
+    in
+      pkgs.wrapProgram srcs "migrate" "cargo" "--add-flags \"sqlx migrate run\"" {
+        passthru.local = pkgs.wrapFlags self'.packages.alexandria-migrations "--set DATABASE_URL=${postgres.local.url}";
+      };
     canivete = {
       arion.modules.tauri = {self'', ...}: {
         services.migrations = {
@@ -31,7 +38,11 @@ in {
         tauri.depends_on.migrations.condition = "process_completed_successfully";
         tauri.readiness_probe.exec.command = "exec 3<>/dev/tcp/localhost/5173";
       };
-      dream2nix.packages.alexandria-tauri.module = {config, dream2nix, ...}: let
+      dream2nix.packages.alexandria-tauri.module = {
+        config,
+        dream2nix,
+        ...
+      }: let
         buildInputs = with config.deps; nix.optionals stdenv.isDarwin [iconv SystemConfiguration];
       in {
         imports = with dream2nix.modules.dream2nix; [rust-cargo-lock rust-crane];
