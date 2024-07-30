@@ -22,7 +22,7 @@
         ]);
         # Tauri v2
         cargo-tauri =
-          (cargo-tauri.override {
+          (pkgs.cargo-tauri.override {
             rustPlatform = pkgs.makeRustPlatform {
               cargo = toolchain;
               rustc = toolchain;
