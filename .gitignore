@@ -7,3 +7,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 /.direnv/
 /.pre-commit-config.yaml
+result
