@@ -21,10 +21,10 @@ async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
     .text()
     .await
     .map_err(|err| String::from("[search_bgg:search_xml:text] ") + &err.to_string())?;
-    let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string())?;
+    let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string() + &search_xml)?;
     let ids = search_items
         .item
-        .clone()
+        .unwrap_or_else(Vec::new)
         .into_iter()
         .map(|item| item.id.parse::<i32>().expect("Not a valid ID"))
         .collect::<Vec<i32>>();
@@ -45,6 +45,7 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
     let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
     let resources = thing_items
         .item
+        .unwrap_or_else(Vec::new)
         .into_iter()
         .zip(ids)
         .map(|(thing, id)| Resource {
@@ -169,7 +170,7 @@ struct SearchItem {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 struct SearchItems {
-    item: Vec<SearchItem>,
+    item: Option<Vec<SearchItem>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -203,7 +204,7 @@ struct ThingItem {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 struct ThingItems {
-    item: Vec<ThingItem>,
+    item: Option<Vec<ThingItem>>,
 }
 
 #[cfg(test)]
