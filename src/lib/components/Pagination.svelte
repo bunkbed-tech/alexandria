@@ -4,6 +4,8 @@ import * as Pagination from "$lib/components/ui/pagination"
 export let count: number
 export let perPage: number
 export let page: number
+
+$: count = count === 0 ? 1 : count
 </script>
 
 <Pagination.Root {count} {perPage} let:pages let:currentPage bind:page>
