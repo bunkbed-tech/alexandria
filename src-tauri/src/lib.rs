@@ -10,17 +10,33 @@ use tauri::{command, State};
 mod models;
 use crate::models::Resource;
 
-#[command]
-async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
-    let search_xml = get(format!(
+async fn bgg_thing_xml(ids: &Vec<i32>) -> Result<String, String> {
+    get(format!(
+        "https://boardgamegeek.com/xmlapi2/thing?id={}",
+        ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
+    ))
+    .await
+    .map_err(|err| String::from("[bgg_thing_xml:_:get] ") + &err.to_string())?
+    .text()
+    .await
+    .map_err(|err| String::from("[bgg_thing_xml:_:text] ") + &err.to_string())
+}
+
+async fn bgg_search_xml(query: &String) -> Result<String, String> {
+    get(format!(
         "https://boardgamegeek.com/xmlapi2/search?query={}",
         query
     ))
     .await
-    .map_err(|err| String::from("[search_bgg:search_xml:get] ") + &err.to_string())?
+    .map_err(|err| String::from("[bgg_search_xml:_:get] ") + &err.to_string())?
     .text()
     .await
-    .map_err(|err| String::from("[search_bgg:search_xml:text] ") + &err.to_string())?;
+    .map_err(|err| String::from("[bgg_search_xml:_:text] ") + &err.to_string())
+}
+
+#[command]
+async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
+    let search_xml = bgg_search_xml(&query).await?;
     let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string() + &search_xml)?;
     let ids = search_items
         .item
@@ -33,15 +49,7 @@ async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
 
 #[command]
 async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
-    let thing_xml = get(format!(
-        "https://boardgamegeek.com/xmlapi2/thing?id={}",
-        ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
-    ))
-    .await
-    .map_err(|err| String::from("[list_bgg_things:thing_xml:get] ") + &err.to_string())?
-    .text()
-    .await
-    .map_err(|err| String::from("[list_bgg_things:thing_xml:text] ") + &err.to_string())?;
+    let thing_xml = bgg_thing_xml(&ids).await?;
     let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
     let resources = thing_items
         .item
@@ -132,17 +140,8 @@ struct PgPoolWrapper {
     pub pool: PgPool,
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub async fn run() {
-    let database_url =
-        var("DATABASE_URL").expect("DATABASE_URL must be set to connect to database");
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&database_url)
-        .await
-        .expect("Error building a postgres connection pool");
-
-    tauri::Builder::default()
+async fn create_app<R: tauri::Runtime>(builder: tauri::Builder<R>, pool: PgPool) {
+    builder
         .manage(PgPoolWrapper { pool })
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
@@ -154,6 +153,19 @@ pub async fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub async fn run() {
+    let database_url =
+        var("DATABASE_URL").expect("DATABASE_URL must be set to connect to database");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("Error building a postgres connection pool");
+
+    create_app(tauri::Builder::default(), pool).await;
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -209,63 +221,69 @@ struct ThingItems {
 
 #[cfg(test)]
 mod tests {
+    use regex::Regex;
+
     use super::*;
 
-    #[test]
-    fn test_search_xml() {
-        let xml = r#"<?xml version="1.0" encoding="utf-8"?><items total="75" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse"> <item type="boardgame" id="398158"> <name type="primary" value="Grind House: Scythes Out"/> <yearpublished value="2023" /> </item> <item type="boardgame" id="226320"> <name type="primary" value="My Little Scythe"/> <yearpublished value="2017" /> </item></items>"#;
-        let items: SearchItems = from_str(&xml).unwrap();
-        let iitems = SearchItems {
-            item: vec![
-                SearchItem {
-                    id: String::from("398158"),
-                    name: Attribute {
-                        value: String::from("Grind House: Scythes Out"),
-                    },
-                    yearpublished: Some(Attribute {
-                        value: String::from("2023"),
-                    }),
-                },
-                SearchItem {
-                    id: String::from("226320"),
-                    name: Attribute {
-                        value: String::from("My Little Scythe"),
-                    },
-                    yearpublished: Some(Attribute {
-                        value: String::from("2017"),
-                    }),
-                },
-            ],
-        };
-        assert_eq!(items, iitems);
+    fn trim_xml(xml: &String) -> String {
+        let re1 = Regex::new(r">\s+<").unwrap();
+        let trimmed_xml1 = re1.replace_all(&xml, "><");
+        let re2 = Regex::new(r"\s/>").unwrap();
+        let trimmed_xml2 = re2.replace_all(&trimmed_xml1, "/>");
+        trimmed_xml2.to_string()
     }
 
-    #[test]
-    fn test_thing_xml() {
-        let xml = r#"<?xml version="1.0" encoding="utf-8"?><items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse"><item type="boardgame" id="225694"><thumbnail>https://cf.geekdo-images.com/hHZWXnUTMYDd_KTAM6Jwlw__thumb/img/O5XHaPOALYquS058qcXWVm5b_k4=/fit-in/200x150/filters:strip_icc()/pic3759421.jpg</thumbnail></item></items>"#;
-        let items: ThingItems = from_str(&xml).unwrap();
-        let iitems = ThingItems {
-            item: vec![
-                ThingItem {
-                    thumbnail: Some(Thumbnail {
-                        value: String::from("https://cf.geekdo-images.com/hHZWXnUTMYDd_KTAM6Jwlw__thumb/img/O5XHaPOALYquS058qcXWVm5b_k4=/fit-in/200x150/filters:strip_icc()/pic3759421.jpg"),
-                    }),
-                },
-            ],
-        };
-        assert_eq!(items, iitems);
+    #[async_std::test]
+    async fn test_bgg_search_xml() {
+        let xml = bgg_search_xml(&String::from("scythe")).await.unwrap();
+        let trimmed_xml = trim_xml(&xml);
+        let items = [
+            r#"<item type="boardgame" id="398158"><name type="primary" value="Grind House: Scythes Out"/><yearpublished value="2023"/></item>"#,
+            r#"<item type="boardgame" id="226320"><name type="primary" value="My Little Scythe"/><yearpublished value="2017"/></item>"#,
+        ];
+        assert!(items.iter().all(|item| trimmed_xml.contains(item)));
+    }
+
+    #[async_std::test]
+    async fn test_bgg_thing_xml() {
+        let xml = bgg_thing_xml(&vec![398158]).await.unwrap();
+        let trimmed_xml = trim_xml(&xml);
+        let items = [
+            r#"<name type="primary" sortindex="1" value="Grind House: Scythes Out"/>"#,
+            r#"<description>The secrets of Grind House deepen in this new expansion that promises greater rewards&amp;hellip;if you can stand the risk.&amp;#10;The Host has opened a new wing of the mansion for you to come explore, and your invitation included a little something extra this time around. But did the other players receive another message too? You&amp;rsquo;d better stay sharp if you want to win Scythes Out.&amp;#10;&amp;#10;New Thematic Mechanic: Promised Inheritance tokens. The Host has invited you all with a promise, but you&amp;rsquo;ll soon find, that some promises are better than others. Rooms offer the ability to swap tokens between yourselves and other players in hopes of ending as the favored player.&amp;#10;&amp;#10;&amp;mdash;description from the designer&amp;#10;&amp;#10;</description>"#,
+            r#"<thumbnail>https://cf.geekdo-images.com/jDB5KAU3JF2YYpBM4mHnKw__thumb/img/_2iVW-Dht0AIbnwXslMJEcl7mA8=/fit-in/200x150/filters:strip_icc()/pic7678523.png</thumbnail>"#,
+            r#"<yearpublished value="2023"/>"#,
+        ];
+        assert!(items.iter().all(|item| trimmed_xml.contains(item)));
     }
 
     #[async_std::test]
     async fn test_search_bgg() {
         let query = String::from("Cranium Cadoo");
-        let resources = search_bgg(query).await.unwrap();
-        let rresources = vec![
+        let resource_ids = search_bgg(query).await.unwrap();
+        // TODO deduplicate IDs in search_bgg
+        let expected_resource_ids = vec![6420, 14454, 14454];
+        assert_eq!(resource_ids, expected_resource_ids);
+    }
+
+    #[async_std::test]
+    async fn test_search_bgg_empty() {
+        let query = String::from("sdlkajlslkshlddk");
+        let resource_ids = search_bgg(query).await.unwrap();
+        let expected_resource_ids = Vec::<i32>::new();
+        assert_eq!(resource_ids, expected_resource_ids);
+    }
+
+    #[async_std::test]
+    async fn test_list_bgg_things() {
+        let ids = vec![6420, 14454];
+        let resources = list_bgg_things(ids).await.unwrap();
+        let expected_resources = vec![
             Resource {
                 id: None,
                 bgg_id: 6420,
                 title: String::from("Cranium Cadoo"),
-                description: String::from(""),
+                description: Some(String::from("A version of Cranium &quot;scaled down&quot; for kids, although the game should still appeal to adults who like Cranium.  Here's the manufacturer's information:&#10;&#10;&quot;With a variety of hilarious activities, Cranium Cadoo gets kids thinking, creating, giggling, grinning, and laughing like crazy as they try to get four in a row to win. With so many different activities, there is something in Cranium Cadoo that will make every kid hoot and high-five. They might even discover a talent they never knew they had!&#10;&#10;And kids just love the cool Cranium Clay, funky tokens, and especially the Secret Decoder Mask. Whether kids love to act, puzzle, sketch, sculpt, or even crack secret codes, Cranium Cadoo has something for everyone&hellip;including you!&quot;&#10;&#10;")),
                 year_published: Some(2001),
                 thumbnail: Some(String::from("https://cf.geekdo-images.com/hQI6W-7HwKty4c5yLFP-Aw__thumb/img/_IyE4nIyGh7_PVfGCarLoNmDMGc=/fit-in/200x150/filters:strip_icc()/pic3335930.jpg")),
             },
@@ -273,11 +291,19 @@ mod tests {
                 id: None,
                 bgg_id: 14454,
                 title: String::from("Cranium Cadoo Booster Box"),
-                description: String::from(""),
+                description: Some(String::from("Booster box with 300 new cards, Clay, secret decoder mask and drawing pad.&#10;&#10;Expands:&#10;&#10;    Cranium Cadoo&#10;&#10;&#10;")),
                 year_published: Some(2001),
                 thumbnail: Some(String::from("https://cf.geekdo-images.com/jboSqbHm5jcQp7XJZPM-vw__thumb/img/v6dQ2IqIdGJIX19AVEZDSaQ5Nms=/fit-in/200x150/filters:strip_icc()/pic58689.jpg")),
             },
         ];
-        assert_eq!(resources, rresources);
+        assert_eq!(resources, expected_resources);
+    }
+
+    #[async_std::test]
+    async fn test_list_bgg_things_invalid() {
+        let ids = vec![0];
+        let resources = list_bgg_things(ids).await.unwrap();
+        let expected_resources = Vec::<Resource>::new();
+        assert_eq!(resources, expected_resources);
     }
 }
