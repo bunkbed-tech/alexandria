@@ -5,6 +5,7 @@
 }: {
   perSystem = {
     pkgs,
+    self',
     system,
     ...
   }: let
@@ -15,8 +16,9 @@
       fenix.targets.wasm32-unknown-unknown.stable.rust-std
       fenix.rust-analyzer
     ]);
+  in {
     # Tauri v2
-    cargo-tauri =
+    packages.cargo-tauri =
       (pkgs.cargo-tauri.override {
         rustPlatform = pkgs.makeRustPlatform {
           cargo = toolchain;
@@ -25,7 +27,7 @@
       })
       .overrideAttrs (old: rec {
         inherit (old) pname;
-        version = "2.0.0-beta.11";
+        version = "2.0.0-rc.1";
         src = pkgs.fetchFromGitHub {
           owner = "tauri-apps";
           repo = "tauri";
@@ -36,15 +38,14 @@
         cargoDeps = old.cargoDeps.overrideAttrs (nix.const {
           name = "${pname}-${version}-vendor.tar.gz";
           inherit src;
-          outputHash = "sha256-iCrLNuaOUCR6wcHsblE1It0F81c973rYqlkOdw53cDA=";
+          outputHash = "sha256-lc8wQoax8dhYp9QCNC8DODOaca2P9AOMC8qn0pNDlic=";
         });
         buildInputs = old.buildInputs ++ nix.optional pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.SystemConfiguration;
       });
-  in {
     canivete.devShell = {
       packages = nix.flatten [
         toolchain
-        cargo-tauri
+        self'.packages.cargo-tauri
         (with pkgs; [
           bun
           sqlx-cli
