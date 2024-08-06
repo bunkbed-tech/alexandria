@@ -1,7 +1,12 @@
 {config, ...}: let
   inherit (config.alexandria) postgres;
 in {
-  perSystem = {inputs', pkgs, self', ...}: {
+  perSystem = {
+    inputs',
+    pkgs,
+    self',
+    ...
+  }: {
     packages.alexandria-migrations = let
       inherit (inputs'.fenix.packages.stable) toolchain;
       sqlx-cli = pkgs.sqlx-cli.override {
@@ -16,7 +21,11 @@ in {
       pkgs.wrapProgram srcs "migrate" "cargo" "--add-flags \"sqlx migrate run\"" {
         passthru.local = pkgs.wrapFlags self'.packages.alexandria-migrations "--set DATABASE_URL=${postgres.local.url}";
       };
-    canivete.dream2nix.packages.alexandria-tauri-frontend-modules.module = {config, lib, dream2nix, ...}: let
+    canivete.dream2nix.packages.alexandria-tauri-frontend-modules.module = {
+      config,
+      dream2nix,
+      ...
+    }: let
       inherit (config.deps) bun;
     in {
       imports = [dream2nix.modules.dream2nix.mkDerivation];
