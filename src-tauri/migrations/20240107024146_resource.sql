@@ -2,9 +2,9 @@
 CREATE TABLE "resource" (
   id SERIAL PRIMARY KEY,
   title TEXT NOT NULL,
-  description TEXT NOT NULL,
+  description TEXT,
   year_published INTEGER,
-  thumbnail TEXT NOT NULL,
+  thumbnail TEXT,
   bgg_id INTEGER NOT NULL UNIQUE
 );
 CREATE TABLE "tag" (

@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter, Result};
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash)]
@@ -21,4 +23,10 @@ pub struct Tagging {
     pub id: i32,
     pub tag_id: i32,
     pub resource_id: i32,
+}
+
+impl Display for Resource {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "{} ({})", self.title, self.id.map_or(String::from("untracked"), |id| id.to_string()))
+    }
 }

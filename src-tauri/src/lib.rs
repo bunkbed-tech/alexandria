@@ -38,12 +38,16 @@ async fn bgg_search_xml(query: &String) -> Result<String, String> {
 async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
     let search_xml = bgg_search_xml(&query).await?;
     let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string() + &search_xml)?;
-    let ids = search_items
+    // The search API returns duplicates (no idea why), so we deduplicate with a HashSet and sort for a guaranteed order
+    let mut ids: Vec<_> = search_items
         .item
         .unwrap_or_else(Vec::new)
         .into_iter()
         .map(|item| item.id.parse::<i32>().expect("Not a valid ID"))
-        .collect::<Vec<i32>>();
+        .collect::<HashSet<i32>>()
+        .into_iter()
+        .collect();
+    ids.sort();
     Ok(ids)
 }
 
@@ -51,7 +55,7 @@ async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
 async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
     let thing_xml = bgg_thing_xml(&ids).await?;
     let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
-    let resources = thing_items
+    let mut resources: Vec<_> = thing_items
         .item
         .unwrap_or_else(Vec::new)
         .into_iter()
@@ -75,23 +79,24 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
         .collect::<HashSet<_>>()
         .into_iter()
         .collect();
+    // BGG doesn't return things in a reliable order, so we sort by bgg_id
+    resources.sort_by_key(|resource| resource.bgg_id);
     Ok(resources)
 }
 
-#[command]
-async fn list_resources(
-    state: State<'_, PgPoolWrapper>,
+async fn _list_resources(
+    pool: &PgPool,
     ids: Option<Vec<i32>>,
 ) -> Result<Vec<Resource>, String> {
     let rows: Vec<Resource>;
     if let Some(bgg_ids) = ids {
         rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#, &bgg_ids)
-            .fetch_all(&state.pool)
+            .fetch_all(pool)
             .await
             .expect("Unable to list resources")
     } else {
         rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource"#)
-            .fetch_all(&state.pool)
+            .fetch_all(pool)
             .await
             .expect("Unable to list resources")
     }
@@ -99,27 +104,20 @@ async fn list_resources(
 }
 
 #[command]
-async fn untrack_resource(
-    mut resource: Resource,
+async fn list_resources(
     state: State<'_, PgPoolWrapper>,
-) -> Result<Resource, String> {
-    sqlx::query_as!(
-        Resource,
-        r#"DELETE FROM resource WHERE id = $1"#,
-        resource.id,
-    )
-    .execute(&state.pool)
-    .await
-    .map_err(|err| String::from("[untrack_resource:_:execute] ") + &err.to_string())?;
-    resource.id = None;
-    Ok(resource)
+    ids: Option<Vec<i32>>,
+) -> Result<Vec<Resource>, String> {
+    _list_resources(&state.pool, ids).await
 }
 
-#[command]
-async fn track_resource(
+async fn _track_resource(
+    pool: &PgPool,
     resource: Resource,
-    state: State<'_, PgPoolWrapper>,
 ) -> Result<Resource, String> {
+    if let Some(_) = resource.id {
+        return Err(format!("Resource {} is already tracked.", resource))
+    }
     let db_resource = {
         sqlx::query_as!(
             Resource,
@@ -129,11 +127,46 @@ async fn track_resource(
             resource.year_published,
             resource.thumbnail,
             resource.bgg_id,
-        ).fetch_one(&state.pool)
+        ).fetch_one(pool)
         .await
         .map_err(|err| String::from("[track_resource:db_resource:fetch_one] ") + &err.to_string())?
     };
     Ok(db_resource)
+}
+
+#[command]
+async fn track_resource(
+    state: State<'_, PgPoolWrapper>,
+    resource: Resource,
+) -> Result<Resource, String> {
+    _track_resource(&state.pool, resource).await
+}
+
+async fn _untrack_resource(
+    pool: &PgPool,
+    mut resource: Resource,
+) -> Result<Resource, String> {
+    if resource.id == None {
+        return Err(format!("Resource {} is already untracked.", resource))
+    }
+    sqlx::query_as!(
+        Resource,
+        r#"DELETE FROM resource WHERE id = $1"#,
+        resource.id,
+    )
+    .execute(pool)
+    .await
+    .map_err(|err| String::from("[untrack_resource:_:execute] ") + &err.to_string())?;
+    resource.id = None;
+    Ok(resource)
+}
+
+#[command]
+async fn untrack_resource(
+    state: State<'_, PgPoolWrapper>,
+    resource: Resource,
+) -> Result<Resource, String> {
+    _untrack_resource(&state.pool, resource).await
 }
 
 struct PgPoolWrapper {
@@ -261,8 +294,7 @@ mod tests {
     async fn test_search_bgg() {
         let query = String::from("Cranium Cadoo");
         let resource_ids = search_bgg(query).await.unwrap();
-        // TODO deduplicate IDs in search_bgg
-        let expected_resource_ids = vec![6420, 14454, 14454];
+        let expected_resource_ids = vec![6420, 14454];
         assert_eq!(resource_ids, expected_resource_ids);
     }
 
@@ -276,7 +308,7 @@ mod tests {
 
     #[async_std::test]
     async fn test_list_bgg_things() {
-        let ids = vec![6420, 14454];
+        let ids = vec![14454, 6420];
         let resources = list_bgg_things(ids).await.unwrap();
         let expected_resources = vec![
             Resource {
@@ -305,5 +337,140 @@ mod tests {
         let resources = list_bgg_things(ids).await.unwrap();
         let expected_resources = Vec::<Resource>::new();
         assert_eq!(resources, expected_resources);
+    }
+
+    #[sqlx::test(fixtures(path = "../fixtures", scripts("resources")))]
+    async fn test_list_resources_all(pool: PgPool) {
+        let ids: Option<Vec<i32>> = None;
+        let resources = _list_resources(&pool, ids).await.unwrap();
+        let expected_resources = vec![
+          Resource {
+              id: Some(1),
+              title: String::from("Scythe"),
+              description: Some(String::from("Really good game")),
+              year_published: Some(2015),
+              thumbnail: Some(String::from("https://google.com")),
+              bgg_id: 9000,
+          },
+          Resource {
+              id: Some(2),
+              title: String::from("Cranium Cadoo"),
+              description: None,
+              year_published: None,
+              thumbnail: None,
+              bgg_id: 420,
+          },
+        ];
+        assert_eq!(resources, expected_resources);
+    }
+
+    #[sqlx::test]
+    async fn test_list_resources_missing(pool: PgPool) {
+        let ids = Some(vec![1]);
+        let resources = _list_resources(&pool, ids).await.unwrap();
+        let expected_resources = Vec::<Resource>::new();
+        assert_eq!(resources, expected_resources);
+    }
+
+    #[sqlx::test(fixtures(path = "../fixtures", scripts("resources")))]
+    async fn test_list_resources_some(pool: PgPool) {
+        let ids = Some(vec![9000]);
+        let resources = _list_resources(&pool, ids).await.unwrap();
+        let expected_resources = vec![
+          Resource {
+              id: Some(1),
+              title: String::from("Scythe"),
+              description: Some(String::from("Really good game")),
+              year_published: Some(2015),
+              thumbnail: Some(String::from("https://google.com")),
+              bgg_id: 9000,
+          },
+        ];
+        assert_eq!(resources, expected_resources);
+    }
+
+    #[sqlx::test]
+    async fn test_track_resource_untracked(pool: PgPool) {
+        let untracked_resource = Resource {
+            id: None,
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        };
+        let tracked_resource = _track_resource(&pool, untracked_resource).await.unwrap();
+        let expected_tracked_resource = Resource {
+            id: Some(1),
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        };
+        assert_eq!(tracked_resource, expected_tracked_resource);
+    }
+
+    #[sqlx::test]
+    async fn test_track_resource_tracked(pool: PgPool) {
+        let tracked_resource = Resource {
+            id: Some(1),
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        };
+        assert!(_track_resource(&pool, tracked_resource).await.is_err());
+    }
+
+    #[sqlx::test(fixtures(path = "../fixtures", scripts("resources")))]
+    async fn test_track_resource_invalid(pool: PgPool) {
+        // This is invalid because the resource is already in the database, but id is None
+        // This should probably only happen if we make a mistake in developing the app
+        let untracked_resource = Resource {
+            id: None,
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        };
+        assert!(_track_resource(&pool, untracked_resource).await.is_err());
+    }
+
+    #[sqlx::test(fixtures(path = "../fixtures", scripts("resources")))]
+    async fn test_untrack_resource_tracked(pool: PgPool) {
+        let tracked_resource = Resource {
+            id: Some(1),
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        };
+        let untracked_resource = _untrack_resource(&pool, tracked_resource).await.unwrap();
+        let expected_untracked_resource = Resource {
+            id: None,
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        };
+        assert_eq!(untracked_resource, expected_untracked_resource);
+    }
+
+    #[sqlx::test]
+    async fn test_untrack_resource_untracked(pool: PgPool) {
+        let untracked_resource = Resource {
+            id: None,
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        };
+        assert!(_untrack_resource(&pool, untracked_resource).await.is_err());
     }
 }
