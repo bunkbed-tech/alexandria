@@ -84,6 +84,29 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
     Ok(resources)
 }
 
+// We couldn't include "impl Future" outside of a function signature, so we had to write this -_-
+fn list_bgg_things_chunks(chunks: std::slice::Chunks<'_, i32>) -> Vec<impl futures::Future<Output = Result<Vec<Resource>, String>>> {
+    chunks.map(|chunk| list_bgg_things(chunk.to_vec())).collect()
+}
+
+#[command]
+async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
+    match search_bgg(query).await {
+        Ok(resource_ids) => {
+            // BGG /thing API has a limit of 20 IDs, so we chunk the IDs
+            let chunk_results: Vec<Result<Vec<Resource>, String>> = futures::future::join_all(list_bgg_things_chunks(resource_ids.chunks(20))).await;
+            let (successes, errors): (Vec<Result<Vec<Resource>, String>>, Vec<Result<Vec<Resource>, String>>) = chunk_results.into_iter().partition(|result| result.is_ok());
+            let successes: Vec<Resource> = successes.into_iter().map(|r| r.unwrap()).flatten().collect();
+            let errors: Vec<String> = errors.into_iter().map(|r| r.unwrap_err()).collect();
+            (successes, errors)
+        },
+        Err(error) => {
+            let empty_results: Vec<Resource> = Vec::new();
+            (empty_results, vec![error])
+        },
+    }
+}
+
 async fn _list_resources(
     pool: &PgPool,
     ids: Option<Vec<i32>>,
@@ -181,6 +204,7 @@ async fn create_app<R: tauri::Runtime>(builder: tauri::Builder<R>, pool: PgPool)
             list_resources,
             search_bgg,
             list_bgg_things,
+            search_bgg_things,
             track_resource,
             untrack_resource,
         ])
