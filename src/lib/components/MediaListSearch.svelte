@@ -1,5 +1,6 @@
 <script lang="ts">
 import { invoke } from "@tauri-apps/api/core"
+import Fuse from "fuse.js"
 import { toast } from "svelte-sonner"
 
 import AlertError from "$lib/components/AlertError.svelte"
@@ -11,6 +12,7 @@ import { Skeleton } from "$lib/components/ui/skeleton"
 import { Resource } from "$lib/types"
 
 let query = ""
+let filterQuery = ""
 let promise: Promise<Resource[]>
 let page: number
 let perPage = 20
@@ -28,6 +30,21 @@ async function searchBggThings(): Promise<Resource[]> {
   const bgg_to_db_id = db_resources.reduce((acc, resource) => acc.set(resource.bgg_id, resource.id), new Map())
   return resources.map(resource => ({ ...resource, id: bgg_to_db_id.get(resource.bgg_id) }))
 }
+
+function filterResources(resources: Resource[]): Resource[] {
+  const options = {
+    includeScore: true,
+    ignoreLocation: true,
+    ignoreFieldNorm: true,
+    useExtendedSearch: true,
+    keys: [
+      { name: "name", weight: 0.99 },
+      { name: "description", weight: 0.01 },
+    ],
+  }
+  const fuse = new Fuse(resources, options)
+  return fuse.search(filterQuery).map(result => result.item)
+}
 </script>
 
 <div class="flex flex-col items-center">
@@ -36,12 +53,14 @@ async function searchBggThings(): Promise<Resource[]> {
     <Input bind:value={query} placeholder="Enter a query ..." />
     <Button type="submit">Search</Button>
   </form>
+  <Input bind:value={filterQuery} placeholder="Filter results by name, description" />
   {#if promise}
     {#await promise}
       <Skeleton class="h-4 w-[200px]" />
     {:then resources}
-      <Pagination count={resources.length} {perPage} bind:page />
-      <ResourceCards resources={resources.slice(perPage * (page - 1), perPage * page)} />
+      {@const filteredResources = filterQuery !== "" ? filterResources(resources) : resources}
+      <Pagination count={filteredResources.length} {perPage} bind:page />
+      <ResourceCards resources={filteredResources.slice(perPage * (page - 1), perPage * page)} />
     {:catch error}
       <p>Error: {error}</p>
     {/await}
