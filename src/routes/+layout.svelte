@@ -1,11 +1,13 @@
 <script lang="ts">
 import "../app.css"
 import * as Collapsible from "$lib/components/ui/collapsible"
+import { Toaster } from "$lib/components/ui/sonner"
 import { ChevronDown, ChevronUp, Search } from "lucide-svelte"
 
 let open = false
 </script>
 
+<Toaster />
 <div class="h-screen w-screen flex">
   <aside class="w-[20%] border-r-[3px] bg-primary">
     <button class="flex w-full justify-between p-3">
