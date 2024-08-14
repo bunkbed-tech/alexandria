@@ -22,7 +22,7 @@ async function toggleTrackResource() {
 
 <div class="flex flex-col gap-3 justify-end w-[200px] h-[300px]">
   <div class="rounded-sm flex bg-secondary size-full items-center justify-center p-1">
-    <div class="rounded-sm bg-contain bg-center bg-no-repeat size-full" style="background-image: url('{resource.thumbnail}')" />
+    <div class="rounded-sm bg-contain bg-center bg-no-repeat size-full" style="background-image: url('{resource.thumbnail || "default.webp"}')" />
   </div>
   <div class="flex justify-start gap-2 items-center h-[10%]">
     <div class="flex">
