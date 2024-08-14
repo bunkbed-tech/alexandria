@@ -37,6 +37,13 @@ You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
 
+## Todo (sorting)
+
+1. [ ] Remove backend sorting (will need to sort in tests for guaranteed order)
+2. [ ] Decouple Fuse.js filtering and sorting
+3. [ ] Clean up frontend filtering and sorting widgets
+4. [ ] Copy filering and sorting into tracked page
+
 ## Todo
 
 1. [ ] Retain state in app between navigation

@@ -33,7 +33,7 @@
     "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
     "fuse.js": "^7.0.0",
-    "lucide-svelte": "^0.416.0",
+    "lucide-svelte": "^0.427.0",
     "mode-watcher": "^0.4.1",
     "svelte-sonner": "^0.3.27",
     "tailwind-merge": "^2.3.0",

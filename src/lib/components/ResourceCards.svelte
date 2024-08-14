@@ -7,7 +7,7 @@ export let resources: Resource[]
 
 <div class="resource-grid flex flex-wrap justify-between gap-3">
   {#each resources as resource}
-    <ResourceCard {resource} on:toggle />
+    <ResourceCard bind:resource={resource} on:toggle />
   {:else}
     <p>No results found<p>
   {/each}
