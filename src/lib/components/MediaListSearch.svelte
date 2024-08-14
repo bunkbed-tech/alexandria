@@ -63,9 +63,8 @@ function filterResources(resources: Resource[], filterQuery: string, yearPublish
   }
   return resourcesFiltered.filter(
     result =>
-      result.year_published &&
-      result.year_published >= yearPublishedRange[0] &&
-      result.year_published <= yearPublishedRange[1],
+      result.year_published == null ||
+      (result.year_published >= yearPublishedRange[0] && result.year_published <= yearPublishedRange[1]),
   )
 }
 </script>
