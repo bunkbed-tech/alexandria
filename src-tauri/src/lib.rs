@@ -39,16 +39,14 @@ async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
     let search_xml = bgg_search_xml(&query).await?;
     let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string() + &search_xml)?;
     // The search API returns duplicates (no idea why), so we deduplicate with a HashSet and sort for a guaranteed order
-    let mut ids: Vec<_> = search_items
+    Ok(search_items
         .item
         .unwrap_or_else(Vec::new)
         .into_iter()
         .map(|item| item.id.parse::<i32>().expect("Not a valid ID"))
         .collect::<HashSet<i32>>()
         .into_iter()
-        .collect();
-    ids.sort();
-    Ok(ids)
+        .collect::<Vec<_>>())
 }
 
 #[command]
@@ -317,7 +315,9 @@ mod tests {
     #[async_std::test]
     async fn test_search_bgg() {
         let query = String::from("Cranium Cadoo");
-        let resource_ids = search_bgg(query).await.unwrap();
+        let mut resource_ids = search_bgg(query).await.unwrap();
+        // BGG /search seems to return resources in a non-deterministic order, so we sort to ensure the test works
+        resource_ids.sort();
         let expected_resource_ids = vec![6420, 14454];
         assert_eq!(resource_ids, expected_resource_ids);
     }

@@ -39,7 +39,7 @@ You can preview the production build with `npm run preview`.
 
 ## Todo (sorting)
 
-1. [ ] Remove backend sorting (will need to sort in tests for guaranteed order)
+1. [x] Remove backend sorting (will need to sort in tests for guaranteed order)
 2. [ ] Decouple Fuse.js filtering and sorting
 3. [ ] Clean up frontend filtering and sorting widgets
 4. [ ] Copy filering and sorting into tracked page
