@@ -94,7 +94,9 @@ async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
     match search_bgg(query).await {
         Ok(resource_ids) => {
             // BGG /thing API has a limit of 20 IDs, so we chunk the IDs
-            let chunk_results: Vec<Result<Vec<Resource>, String>> = futures::future::join_all(list_bgg_things_chunks(resource_ids.chunks(20))).await;
+            // We also limit the number of resources to 100 so as not to take too long
+            let maximum_resource_ids = &resource_ids[..100.min(resource_ids.len())];
+            let chunk_results: Vec<Result<Vec<Resource>, String>> = futures::future::join_all(list_bgg_things_chunks(maximum_resource_ids.chunks(20))).await;
             let (successes, errors): (Vec<Result<Vec<Resource>, String>>, Vec<Result<Vec<Resource>, String>>) = chunk_results.into_iter().partition(|result| result.is_ok());
             let successes: Vec<Resource> = successes.into_iter().map(|r| r.unwrap()).flatten().collect();
             let errors: Vec<String> = errors.into_iter().map(|r| r.unwrap_err()).collect();
