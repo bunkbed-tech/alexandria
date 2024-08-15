@@ -57,11 +57,13 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
         .item
         .unwrap_or_else(Vec::new)
         .into_iter()
+        .filter(|thing| thing.name.is_some())
         .zip(ids)
         .map(|(thing, id)| Resource {
             id: None,
             title: thing
                 .name
+                .expect("")
                 .iter()
                 .filter(|name| name.name_type == NameType::Primary)
                 .next()
@@ -266,7 +268,7 @@ struct ThingItem {
     description: Option<InnerText>,
     thumbnail: Option<InnerText>,
     yearpublished: Option<Attribute>,
-    name: Vec<NameAttribute>,
+    name: Option<Vec<NameAttribute>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
