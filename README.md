@@ -40,7 +40,7 @@ You can preview the production build with `npm run preview`.
 ## Todo (sorting)
 
 1. [x] Remove backend sorting (will need to sort in tests for guaranteed order)
-2. [ ] Decouple Fuse.js filtering and sorting
+2. [x] Decouple Fuse.js filtering and sorting
 3. [ ] Clean up frontend filtering and sorting widgets
 4. [ ] Copy filering and sorting into tracked page
 
@@ -54,6 +54,7 @@ You can preview the production build with `npm run preview`.
 6. [ ] Filtering, sorting, search on list pages
 7. [ ] Package standalone release with database
 8. [ ] Make combobox options dynamic
+9. [ ] Figure out why searchBggThings can't set resources to an empty list (it will freeze the app)
 
 ## v2 Todos
 
