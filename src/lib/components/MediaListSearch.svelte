@@ -110,7 +110,7 @@ function onToggleResource() {
         <Slider bind:value={yearPublishedRange} {min} {max} />
         <Select.Root bind:selected={sort}>
           <Select.Trigger class="w-[180px]">
-            <Select.Value placeholder="Theme" />
+            <Select.Value placeholder="Default" />
           </Select.Trigger>
           <Select.Content>
             <Select.Item value="default" label="Default" />
