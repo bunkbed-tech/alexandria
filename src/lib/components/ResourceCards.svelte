@@ -9,7 +9,7 @@ export let resources: Resource[]
   {#each resources as resource}
     <ResourceCard bind:resource={resource} on:toggle />
   {:else}
-    <p>No results found<p>
+    <p>No results found</p>
   {/each}
 </div>
 

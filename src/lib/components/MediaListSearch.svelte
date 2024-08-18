@@ -36,7 +36,6 @@ let page = 1
 let resources: Resource[] = []
 let sort = { value: "default" as Sorter }
 
-$: console.log("resources: ", resources)
 $: min = resources.reduce(
   (min, resource) => (resource.year_published && resource.year_published < min ? resource.year_published : min),
   Number.POSITIVE_INFINITY,
@@ -58,16 +57,13 @@ $: filteredResources = resources
 $: pageResources = filteredResources.slice(perPage * (page - 1), perPage * page)
 
 async function searchBggThings() {
-  console.log("Searching BGG")
   const [api_resources, errors] = await invoke<[Resource[], string[]]>("search_bgg_things", { query })
 
-  console.log("Generate error toasts")
   // Render any errors as toasts
   for (const error of errors) {
     toast.custom(AlertError, { componentProps: { error } })
   }
 
-  console.log("Matching BGG results with database of tracked resources")
   // Match with resources already tracked in database
   const db_resources = await invoke<Resource[]>("list_resources", {
     ids: api_resources.map(resource => resource.bgg_id),
@@ -75,7 +71,6 @@ async function searchBggThings() {
   const bgg_to_db_id = db_resources.reduce((acc, resource) => acc.set(resource.bgg_id, resource.id), new Map())
   const matched_resources = api_resources.map(resource => ({ ...resource, id: bgg_to_db_id.get(resource.bgg_id) }))
 
-  console.log("Fuzzy matching query text to weight title over description")
   // Fuzzy search
   const options = {
     includeScore: true,
