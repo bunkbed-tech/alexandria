@@ -106,19 +106,21 @@ function onToggleResource() {
     {#await promise}
       <Skeleton class="h-4 w-[200px]" />
     {:then}
-      <Slider bind:value={yearPublishedRange} {min} {max} />
-      <Select.Root bind:selected={sort}>
-        <Select.Trigger class="w-[180px]">
-          <Select.Value placeholder="Theme" />
-        </Select.Trigger>
-        <Select.Content>
-          <Select.Item value="default" label="Default" />
-          <Select.Item value="alphabetical" label="Alphabetical" />
-          <Select.Item value="year" label="Year Published" />
-          <Select.Item value="tracked" label="Tracking Status" />
-        </Select.Content>
-      </Select.Root>
-      <Pagination count={filteredResources.length} {perPage} bind:page />
+      {#if resources.length != 0}
+        <Slider bind:value={yearPublishedRange} {min} {max} />
+        <Select.Root bind:selected={sort}>
+          <Select.Trigger class="w-[180px]">
+            <Select.Value placeholder="Theme" />
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Item value="default" label="Default" />
+            <Select.Item value="alphabetical" label="Alphabetical" />
+            <Select.Item value="year" label="Year Published" />
+            <Select.Item value="tracked" label="Tracking Status" />
+          </Select.Content>
+        </Select.Root>
+        <Pagination count={filteredResources.length} {perPage} bind:page />
+      {/if}
       <ResourceCards bind:resources={pageResources} on:toggle={onToggleResource} />
     {:catch error}
       <p>Error: {error}</p>
