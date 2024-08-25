@@ -11,6 +11,7 @@ import { Input } from "$lib/components/ui/input"
 import * as Select from "$lib/components/ui/select"
 import { Skeleton } from "$lib/components/ui/skeleton"
 import { Slider } from "$lib/components/ui/slider"
+import * as Tabs from "$lib/components/ui/tabs"
 import { Resource } from "$lib/types"
 
 const perPage = 20
@@ -86,7 +87,6 @@ async function searchBggThings() {
     ],
   }
   const fuse = new Fuse(matched_resources, options)
-  // TODO The app freezes if this is an empty array... WTF
   resources = fuse.search(query).map(result => result.item)
 }
 
@@ -96,34 +96,42 @@ function onToggleResource() {
 }
 </script>
 
-<div class="flex flex-col items-center">
-  <h2>BoardGameGeek</h2>
-  <form class="flex gap-4" on:submit={() => promise = searchBggThings()}>
-    <Input bind:value={query} placeholder="Enter a query ..." />
-    <Button type="submit">Search</Button>
-  </form>
-  {#if promise}
-    {#await promise}
-      <Skeleton class="h-4 w-[200px]" />
-    {:then}
-      {#if resources.length != 0}
-        <Slider bind:value={yearPublishedRange} {min} {max} />
-        <Select.Root bind:selected={sort}>
-          <Select.Trigger class="w-[180px]">
-            <Select.Value placeholder="Default" />
-          </Select.Trigger>
-          <Select.Content>
-            <Select.Item value="default" label="Default" />
-            <Select.Item value="alphabetical" label="Alphabetical" />
-            <Select.Item value="year" label="Year Published" />
-            <Select.Item value="tracked" label="Tracking Status" />
-          </Select.Content>
-        </Select.Root>
-        <Pagination count={filteredResources.length} {perPage} bind:page />
-      {/if}
-      <ResourceCards bind:resources={pageResources} on:toggle={onToggleResource} />
-    {:catch error}
-      <p>Error: {error}</p>
-    {/await}
-  {/if}
-</div>
+<Tabs.Root value="board-games">
+  <Tabs.List>
+    <Tabs.Trigger value="board-games">Board Games</Tabs.Trigger>
+    <Tabs.Trigger value="tab-2">Tab 2</Tabs.Trigger>
+    <Tabs.Trigger value="tab-3">Tab 3</Tabs.Trigger>
+  </Tabs.List>
+  <Tabs.Content value="board-games">
+    <form class="flex gap-4" on:submit={() => promise = searchBggThings()}>
+      <Input bind:value={query} placeholder="Enter a query ..." />
+      <Button type="submit">Search</Button>
+    </form>
+    {#if promise}
+      {#await promise}
+        <Skeleton class="h-4 w-[200px]" />
+      {:then}
+        {#if resources.length != 0}
+          <Slider bind:value={yearPublishedRange} {min} {max} />
+          <Select.Root bind:selected={sort}>
+            <Select.Trigger class="w-[180px]">
+              <Select.Value placeholder="Default" />
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="default" label="Default" />
+              <Select.Item value="alphabetical" label="Alphabetical" />
+              <Select.Item value="year" label="Year Published" />
+              <Select.Item value="tracked" label="Tracking Status" />
+            </Select.Content>
+          </Select.Root>
+          <Pagination count={filteredResources.length} {perPage} bind:page />
+        {/if}
+        <ResourceCards bind:resources={pageResources} on:toggle={onToggleResource} />
+      {:catch error}
+        <p>Error: {error}</p>
+      {/await}
+    {/if}
+  </Tabs.Content>
+  <Tabs.Content value="tab-2">Welcome to Tab 2</Tabs.Content>
+  <Tabs.Content value="tab-3">Welcome to Tab 3</Tabs.Content>
+</Tabs.Root>
