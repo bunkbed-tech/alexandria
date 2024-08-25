@@ -37,27 +37,50 @@ You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
 
-## Todo (sorting)
-
-1. [x] Remove backend sorting (will need to sort in tests for guaranteed order)
-2. [x] Decouple Fuse.js filtering and sorting
-3. [ ] Clean up frontend filtering and sorting widgets
-4. [ ] Copy filering and sorting into tracked page
-
 ## Todo
 
 1. [ ] Retain state in app between navigation
 2. [ ] Fix up list creation buttons
-3. [ ] make ResourceCard look good (hover, grid spacing, photo sizes)
-4. [ ] Add more APIs
-5. [ ] Sorting BGG API results by bgg_id
-6. [ ] Filtering, sorting, search on list pages
-7. [ ] Package standalone release with database
-8. [ ] Make combobox options dynamic
-9. [ ] Figure out why searchBggThings can't set resources to an empty list (it will freeze the app)
+3. [ ] Add more APIs
+4. [ ] Package standalone release with database
+5. [ ] Make combobox options dynamic
 
 ## v2 Todos
 
 1. [ ] Server-client architecture
 2. [ ] Self-hosted templates or packages (k8s, docker, etc., NIX)
 3. [ ] Mobile app
+4. [ ] data export
+
+## Frontend Styling
+
+1. [ ] minimum window size
+2. [ ] white text for everything with orange background
+3. [ ] padding between pagination and title and grid
+4. [ ] dynamic header
+5. [ ] delay filter activation (must be clicked!)
+6. [ ] labels for filters
+7. [ ] proper form for filter dialog
+8. [ ] increments for slider and labels for knobs
+9. [ ] same highlight on hover mechanism for resource card buttons and pagination
+10. [ ] thin dividers on the sides of pagination
+11. [ ] FIX THE GRID
+12. [ ] carousel view
+13. [ ] items per page setting
+14. [ ] elongate placeholder thumbnail to full size
+15. [ ] fix infinite scroll of titles
+16. [ ] blow up and gray out thumbnail as new background
+17. [ ] bug where wrong items in tracked are removed
+18. [ ] logos
+19. [ ] function loading placeholder (spinner, progress bar)
+20. [ ] undo toast
+21. [ ] untrack confirmation dialog
+22. [ ] get slider to work again
+
+## APIs
+
+1. [ ] twitch/amazon api for video games
+2. [ ] google books api
+3. [ ] discogs
+4. [ ] myanimelist
+5. [ ] vndb
