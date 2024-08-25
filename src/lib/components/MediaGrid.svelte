@@ -1,9 +1,6 @@
 <script lang="ts">
-import { invoke } from "@tauri-apps/api/core"
 import Fuse from "fuse.js"
-import { toast } from "svelte-sonner"
 
-import AlertError from "$lib/components/AlertError.svelte"
 import Pagination from "$lib/components/Pagination.svelte"
 import ResourceCards from "$lib/components/ResourceCards.svelte"
 import { Button } from "$lib/components/ui/button"
@@ -31,8 +28,12 @@ const sorterCompareFns: Record<Sorter, (a: Resource, b: Resource) => number> = {
   tracked: (a, b) => +!!b.id - +!!a.id,
 }
 
-let query = ""
-let promise: Promise<void> | null = null
+export let filterPageResources: (_: Resource[]) => Resource[] = a => a
+export let searchOnMount = false
+export let searcher: () => Promise<Resource[]>
+export let query = ""
+
+let promise: Promise<void> | null = searchOnMount ? searchAndFilter() : null
 let page = 1
 let resources: Resource[] = []
 let sort = { value: "default" as Sorter }
@@ -57,42 +58,38 @@ $: filteredResources = resources
   .sort(sorterCompareFns[sort.value])
 $: pageResources = filteredResources.slice(perPage * (page - 1), perPage * page)
 
-async function searchBggThings() {
-  const [api_resources, errors] = await invoke<[Resource[], string[]]>("search_bgg_things", { query })
+async function searchAndFilter() {
+  const endpoint_resources = await searcher()
 
-  // Render any errors as toasts
-  for (const error of errors) {
-    toast.custom(AlertError, { componentProps: { error } })
+  if (query === "") {
+    resources = endpoint_resources
+  } else {
+    // Fuzzy search
+    const options = {
+      includeScore: true,
+      keys: [
+        {
+          name: "title",
+          weight: 0.9,
+        },
+        {
+          name: "description",
+          weight: 0.1,
+        },
+      ],
+    }
+    const fuse = new Fuse(endpoint_resources, options)
+    resources = fuse.search(query).map(result => result.item)
   }
-
-  // Match with resources already tracked in database
-  const db_resources = await invoke<Resource[]>("list_resources", {
-    ids: api_resources.map(resource => resource.bgg_id),
-  })
-  const bgg_to_db_id = db_resources.reduce((acc, resource) => acc.set(resource.bgg_id, resource.id), new Map())
-  const matched_resources = api_resources.map(resource => ({ ...resource, id: bgg_to_db_id.get(resource.bgg_id) }))
-
-  // Fuzzy search
-  const options = {
-    includeScore: true,
-    keys: [
-      {
-        name: "title",
-        weight: 0.9,
-      },
-      {
-        name: "description",
-        weight: 0.1,
-      },
-    ],
-  }
-  const fuse = new Fuse(matched_resources, options)
-  resources = fuse.search(query).map(result => result.item)
 }
 
 function onToggleResource() {
   console.log("Updating resources on toggle")
-  resources = [...resources.slice(0, perPage * (page - 1)), ...pageResources, ...resources.slice(perPage * page)]
+  resources = [
+    ...resources.slice(0, perPage * (page - 1)),
+    ...filterPageResources(pageResources),
+    ...resources.slice(perPage * page),
+  ]
 }
 </script>
 
@@ -103,7 +100,7 @@ function onToggleResource() {
     <Tabs.Trigger value="tab-3">Tab 3</Tabs.Trigger>
   </Tabs.List>
   <Tabs.Content value="board-games">
-    <form class="flex gap-4" on:submit={() => promise = searchBggThings()}>
+    <form class="flex gap-4" on:submit={() => promise = searchAndFilter()}>
       <Input bind:value={query} placeholder="Enter a query ..." />
       <Button type="submit">Search</Button>
     </form>
