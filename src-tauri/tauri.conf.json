@@ -11,9 +11,9 @@
   "app": {
     "windows": [
       {
-        "title": "alexandria",
-        "width": 800,
-        "height": 600
+        "title": "Alexandria",
+        "minHeight": 450,
+        "minWidth": 1000
       }
     ],
     "security": {
