@@ -11,7 +11,7 @@ $: count = count === 0 ? 1 : count
 <Pagination.Root {count} {perPage} let:pages let:currentPage bind:page>
   <Pagination.Content>
     <Pagination.Item>
-      <Pagination.PrevButton />
+      <Pagination.PrevButton class="hover:bg-primary hover:text-white" />
     </Pagination.Item>
     {#each pages as page (page.key)}
       {#if page.type === "ellipsis"}
@@ -20,14 +20,15 @@ $: count = count === 0 ? 1 : count
         </Pagination.Item>
       {:else}
         <Pagination.Item>
-          <Pagination.Link {page} isActive={currentPage == page.value}>
+          {@const isActive = currentPage == page.value}
+          <Pagination.Link {page} {isActive} class="hover:bg-primary hover:text-white {isActive ? 'bg-secondary text-white' : ''}">
             {page.value}
           </Pagination.Link>
         </Pagination.Item>
       {/if}
     {/each}
     <Pagination.Item>
-      <Pagination.NextButton />
+      <Pagination.NextButton class="hover:bg-primary hover:text-white" />
     </Pagination.Item>
   </Pagination.Content>
 </Pagination.Root>

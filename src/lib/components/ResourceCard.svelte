@@ -25,12 +25,12 @@ async function toggleTrackResource() {
     <div class="rounded-sm bg-contain bg-center bg-no-repeat size-full" style="background-image: url('{resource.thumbnail || "default.webp"}')" />
   </div>
   <div class="flex justify-start gap-2 items-center h-[10%]">
-    <div class="flex">
+    <div class="flex text-white">
       <!-- <Button on:click={toggleTrackResource} size="icon" class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-muted-foreground bg-transparent"> -->
-      <Button on:click={toggleTrackResource} size="icon" class="rounded-r-none w-8 h-8">
-        <Bookmark fill={tracked ? "var(--foreground)" : "none"} />
+      <Button on:click={toggleTrackResource} size="icon" class="border-4 border-r-1 border-primary rounded-r-none w-8 h-8 {tracked ? 'text-secondary' : ''}">
+        <Bookmark fill={tracked ? "var(--secondary)" : "none"} class="hover:bg-white rounded-sm {tracked ? 'hover:text-white' : 'hover:text-brown'}" />
       </Button>
-      <Button on:click={toggleTrackResource} size="icon" class="rounded-l-none w-4 h-8">
+      <Button on:click={toggleTrackResource} size="icon" class="rounded-l-none w-4 h-8 hover:bg-secondary">
         <ChevronDown />
       </Button>
     </div>

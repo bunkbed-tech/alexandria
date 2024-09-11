@@ -55,7 +55,7 @@ You can preview the production build with `npm run preview`.
 ## Frontend Styling
 
 1. [x] minimum window size
-2. [ ] white text for everything with orange background
+2. [x] white text for everything with orange background
 3. [ ] padding between pagination and title and grid
 4. [ ] dynamic header
 5. [ ] delay filter activation (must be clicked!)
