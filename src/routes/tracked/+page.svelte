@@ -23,4 +23,4 @@ function filterPageResources(pageResources: Resource[]) {
 }
 </script>
 
-<MediaGrid searcher={listResources} searchOnMount {filterPageResources} />
+<MediaGrid searcher={listResources} title="Tracked" searchOnMount {filterPageResources} />

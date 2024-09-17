@@ -26,4 +26,4 @@ async function searchBggThings() {
 }
 </script>
 
-<MediaGrid searcher={searchBggThings} bind:query />
+<MediaGrid searcher={searchBggThings} title="Search" bind:query />

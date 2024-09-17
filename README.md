@@ -57,7 +57,7 @@ You can preview the production build with `npm run preview`.
 1. [x] minimum window size
 2. [x] white text for everything with orange background
 3. [x] padding between pagination and title and grid
-4. [ ] dynamic header
+4. [x] dynamic header
 5. [ ] delay filter activation (must be clicked!)
 6. [ ] labels for filters
 7. [ ] proper form for filter dialog

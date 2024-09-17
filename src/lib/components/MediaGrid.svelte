@@ -34,6 +34,7 @@ export let filterPageResources: (_: Resource[]) => Resource[] = a => a
 export let searchOnMount = false
 export let searcher: () => Promise<Resource[]>
 export let query = ""
+export let title: string
 
 let promise: Promise<void> | null = searchOnMount ? searchAndFilter() : null
 let page = 1
@@ -102,7 +103,7 @@ function onToggleResource() {
         <Tabs.Trigger value="video-games" class="data-[state=active]:bg-secondary data-[state=active]:text-white hover:text-brown hover:bg-white">Video Games</Tabs.Trigger>
         <Tabs.Trigger value="books" class="data-[state=active]:bg-secondary data-[state=active]:text-white hover:text-brown hover:bg-white">Books</Tabs.Trigger>
       </Tabs.List>
-      <p class="text-4xl">Header</p>
+      <p class="text-4xl">{title}</p>
       <div class="flex gap-2">
         <Dialog.Trigger><Button size="icon" class="text-white hover:bg-secondary" disabled={resources.length == 0}><ArrowDownWideNarrow /></Button></Dialog.Trigger>
         <form class="flex gap-2" on:submit={() => promise = searchAndFilter()}>
