@@ -9,7 +9,7 @@ $: count = count === 0 ? 1 : count
 </script>
 
 <Pagination.Root {count} {perPage} let:pages let:currentPage bind:page>
-  <Pagination.Content>
+  <Pagination.Content class="my-2">
     <Pagination.Item>
       <Pagination.PrevButton class="hover:bg-primary hover:text-white" />
     </Pagination.Item>
