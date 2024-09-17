@@ -14,10 +14,14 @@ export { className as class }
 	class={cn("relative flex w-full touch-none select-none items-center", className)}
 	{...$$restProps}
 	let:thumbs
+	let:ticks
 >
 	<span class="bg-secondary relative h-2 w-full grow overflow-hidden rounded-full">
 		<SliderPrimitive.Range class="bg-primary absolute h-full" />
 	</span>
+	{#each ticks as tick}
+		<SliderPrimitive.Tick {tick} />
+    {/each}
 	{#each thumbs as thumb}
 		<SliderPrimitive.Thumb
 			{thumb}

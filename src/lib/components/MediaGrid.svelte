@@ -7,6 +7,7 @@ import ResourceCards from "$lib/components/ResourceCards.svelte"
 import { Button } from "$lib/components/ui/button"
 import * as Dialog from "$lib/components/ui/dialog"
 import { Input } from "$lib/components/ui/input"
+import { Label } from "$lib/components/ui/label"
 import * as Select from "$lib/components/ui/select"
 import { Skeleton } from "$lib/components/ui/skeleton"
 import { Slider } from "$lib/components/ui/slider"
@@ -124,8 +125,9 @@ function onToggleResource() {
                 <Dialog.Description>Filter and sort resources by different attributes.</Dialog.Description>
               </Dialog.Header>
               <Select.Root bind:selected={sort}>
+                <Label for="select">Sorting Algorithm</Label>
                 <Select.Trigger class="w-[180px]">
-                  <Select.Value placeholder="Default" />
+                  <Select.Value id="select" placeholder="Default" />
                 </Select.Trigger>
                 <Select.Content>
                   <Select.Item value="default" label="Default" />
@@ -134,8 +136,8 @@ function onToggleResource() {
                   <Select.Item value="tracked" label="Tracking Status" />
                 </Select.Content>
               </Select.Root>
-              <Slider bind:value={yearPublishedRange} {min} {max} />
-              <Dialog.Footer>Okay done</Dialog.Footer>
+              <Label for="slider">Year Published</Label>
+              <Slider id="slider" bind:value={yearPublishedRange} {min} {max} />
             </Dialog.Content>
           {/if}
           <Pagination count={filteredResources.length} {perPage} bind:page />
