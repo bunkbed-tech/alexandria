@@ -11,7 +11,7 @@ export { className as class }
 
 <SliderPrimitive.Root
 	bind:value
-	class={cn("relative flex w-full touch-none select-none items-center", className)}
+	class={cn("relative flex w-full touch-none select-none items-center mb-2", className)}
 	{...$$restProps}
 	let:thumbs
 	let:ticks
@@ -20,7 +20,9 @@ export { className as class }
 		<SliderPrimitive.Range class="bg-primary absolute h-full" />
 	</span>
 	{#each ticks as tick}
-		<SliderPrimitive.Tick {tick} />
+		<SliderPrimitive.Tick {tick} asChild let:builder>
+			<span use:builder.action {...builder} class="text-sm flex flex-col items-center w-1 h-3 rounded-full data-[bounded=true]:bg-secondary bg-primary cursor-pointer"><br />{builder["data-value"]}</span>
+		</SliderPrimitive.Tick>
     {/each}
 	{#each thumbs as thumb}
 		<SliderPrimitive.Thumb
