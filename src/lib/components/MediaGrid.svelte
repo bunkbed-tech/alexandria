@@ -125,10 +125,12 @@ function onToggleResource() {
                 <Dialog.Description>Filter and sort resources by different attributes.</Dialog.Description>
               </Dialog.Header>
               <Select.Root bind:selected={sort}>
-                <Label for="select">Sorting Algorithm</Label>
-                <Select.Trigger class="w-[180px]">
-                  <Select.Value id="select" placeholder="Default" />
-                </Select.Trigger>
+                <div class="flex items-center justify-between">
+                  <Label for="select">Sorting Algorithm</Label>
+                  <Select.Trigger class="w-[180px]">
+                    <Select.Value id="select" placeholder="Default" />
+                  </Select.Trigger>
+                </div>
                 <Select.Content>
                   <Select.Item value="default" label="Default" />
                   <Select.Item value="alphabetical" label="Alphabetical" />
