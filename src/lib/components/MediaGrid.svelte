@@ -139,7 +139,7 @@ function onToggleResource() {
                 </Select.Content>
               </Select.Root>
               <Label for="slider">Year Published</Label>
-              <Slider id="slider" bind:value={yearPublishedRange} {min} {max} />
+              <Slider id="slider" bind:value={yearPublishedRange} {min} {max} step={Math.round((max - min) / 10)} />
             </Dialog.Content>
           {/if}
           <Pagination count={filteredResources.length} {perPage} bind:page />
