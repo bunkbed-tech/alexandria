@@ -1,6 +1,6 @@
 <script lang="ts">
 import Fuse from "fuse.js"
-import { ArrowDownWideNarrow } from "lucide-svelte"
+import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpAZ } from "lucide-svelte"
 
 import Pagination from "$lib/components/Pagination.svelte"
 import ResourceCards from "$lib/components/ResourceCards.svelte"
@@ -40,7 +40,9 @@ export let title: string
 let promise: Promise<void> | null = searchOnMount ? searchAndFilter() : null
 let page = 1
 let resources: Resource[] = []
+let filteredResources: Resource[] = []
 let sort = { value: "default" as Sorter }
+let reverseOrder = false
 
 $: min = resources.reduce(
   (min, resource) => (resource.year_published && resource.year_published < min ? resource.year_published : min),
@@ -51,15 +53,18 @@ $: max = resources.reduce(
   Number.NEGATIVE_INFINITY,
 )
 $: yearPublishedRange = [min, max] as [number, number]
-$: filteredResources = resources
-  // Year published within slider range (keep all nulls)
-  .filter(
-    result =>
-      result.year_published == null ||
-      (result.year_published >= yearPublishedRange[0] && result.year_published <= yearPublishedRange[1]),
-  )
-  // Sort the results by the specified feature
-  .sort(sorterCompareFns[sort.value])
+$: {
+  filteredResources = resources
+    // Year published within slider range (keep all nulls)
+    .filter(
+      result =>
+        result.year_published == null ||
+        (result.year_published >= yearPublishedRange[0] && result.year_published <= yearPublishedRange[1]),
+    )
+    // Sort the results by the specified feature
+    .sort(sorterCompareFns[sort.value])
+  filteredResources = reverseOrder ? filteredResources.reverse() : filteredResources
+}
 $: pageResources = filteredResources.slice(perPage * (page - 1), perPage * page)
 
 async function searchAndFilter() {
@@ -127,9 +132,18 @@ function onToggleResource() {
               <Select.Root bind:selected={sort}>
                 <div class="flex items-center justify-between">
                   <Label for="select">Sorting Algorithm</Label>
-                  <Select.Trigger class="w-[180px]">
-                    <Select.Value id="select" placeholder="Default" />
-                  </Select.Trigger>
+                  <div class="flex items-center gap-2">
+                    <Button size="icon" class="text-white hover:bg-secondary" on:click={() => reverseOrder = !reverseOrder}>
+                      {#if reverseOrder}
+                        <ArrowUpAZ />
+                      {:else}
+                        <ArrowDownAZ />
+                      {/if}
+                    </Button>
+                    <Select.Trigger class="w-[180px]">
+                      <Select.Value id="select" placeholder="Default" />
+                    </Select.Trigger>
+                  </div>
                 </div>
                 <Select.Content>
                   <Select.Item value="default" label="Default" />
