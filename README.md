@@ -58,24 +58,23 @@ You can preview the production build with `npm run preview`.
 2. [x] white text for everything with orange background
 3. [x] padding between pagination and title and grid
 4. [x] dynamic header
-5. [ ] delay filter activation (must be clicked!)
-6. [ ] labels for filters
-7. [ ] proper form for filter dialog
-8. [ ] increments for slider and labels for knobs
-9. [ ] same highlight on hover mechanism for resource card buttons and pagination
-10. [ ] thin dividers on the sides of pagination
-11. [ ] FIX THE GRID
-12. [ ] carousel view
-13. [ ] items per page setting
-14. [ ] elongate placeholder thumbnail to full size
-15. [ ] fix infinite scroll of titles
-16. [ ] blow up and gray out thumbnail as new background
-17. [ ] bug where wrong items in tracked are removed
-18. [ ] logos
-19. [ ] function loading placeholder (spinner, progress bar)
-20. [ ] undo toast
-21. [ ] untrack confirmation dialog
-22. [ ] get slider to work again
+5. [x] labels for filters
+6. [x] increments for slider and labels for knobs
+7. [ ] filter knobs should be fine tuned to allow for arbitrary filtering between years instead of binary
+8. [x] same highlight on hover mechanism for resource card buttons and pagination
+9. [ ] thin dividers on the sides of pagination
+10. [ ] FIX THE GRID
+11. [ ] carousel view
+12. [ ] items per page setting
+13. [ ] elongate placeholder thumbnail to full size
+14. [ ] fix infinite scroll of titles
+15. [ ] blow up and gray out thumbnail as new background
+16. [ ] bug where wrong items in tracked are removed
+17. [ ] logos
+18. [ ] function loading placeholder (spinner, progress bar)
+19. [ ] undo toast
+20. [ ] untrack confirmation dialog
+21. [ ] get slider to work again
 
 ## APIs
 
