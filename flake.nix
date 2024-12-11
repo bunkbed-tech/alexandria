@@ -50,6 +50,7 @@
           toolchain
           cargo-tauri
           (with pkgs; [
+            go
             bun
             trunk
             wasm-bindgen-cli
