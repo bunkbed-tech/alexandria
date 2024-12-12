@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  db:
+  postgres:
     image: postgres:15
     container_name: postgres
     env_file: .env
@@ -15,17 +15,20 @@ services:
       - postgres-logs:/var/lib/postgresql/pg_log
     ports:
       - 5432:5432
-  migrate:
+  backend:
     build:
-      context: src-tauri
-    container_name: migrate
-    env_file: .env
+      context: backend
+    container_name: backend
     environment:
       DATABASE_URL: postgresql://$POSTGRES_USER:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/$POSTGRES_DB
     command: [ cargo, sqlx, migrate, run ]
     depends_on:
       db:
         condition: service_healthy
+  frontend:
+  cli:
+  desktop:
+
   # TODO fix dummy data script
   # dummy_data:
   #   image: postgres:15

@@ -1,0 +1,18 @@
+[package]
+name = "alexandria"
+version = "0.0.1"
+authors = [
+    "Tristan Schrader <t0rdos@pm.me>",
+    "Tahoe Schrader <tahoeschrader@gmail.com"
+]
+edition = "2021"
+
+[dependencies]
+actix-web = "4.3.1"
+futures = "0.3.30"
+quick-xml = { version = "0.31.0", features = ["serialize"] }
+regex = "1.10.6"
+reqwest = "0.11.23"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.105"
+sqlx = { version = "0.7.3", features = ["runtime-async-std", "tls-native-tls", "postgres", "time", "migrate"] }
