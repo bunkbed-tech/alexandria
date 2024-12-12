@@ -68,8 +68,12 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case leftView:
 			m.left, cmd = m.left.Update(msg)
 			cmds = append(cmds, cmd)
-			m.right = m.right.Refresh(m.left.selected)
-		default:
+			switch msg.String() {
+			case "enter", " ":
+				m.right, cmd = m.right.Refresh(m.left.selected)
+				cmds = append(cmds, cmd)
+			}
+		case rightView:
 			m.right, cmd = m.right.Update(msg)
 			cmds = append(cmds, cmd)
 		}

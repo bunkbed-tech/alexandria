@@ -1,10 +1,10 @@
 package main
 
 import (
+	"alexandria-cli/components"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"os"
-	"practice-cli/components"
 )
 
 func main() {

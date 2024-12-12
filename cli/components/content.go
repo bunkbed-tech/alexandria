@@ -22,12 +22,13 @@ func (m content) Init() tea.Cmd {
 	return nil
 }
 
-func (m content) Refresh(left_selected string) content {
-	// TODO: Figure out bug where when you tab, it refreshes when it shouldnt
-	m.choices = []string{left_selected, left_selected, left_selected}
-	m.cursor = 0
-	m.selected = make(map[int]struct{})
-	return m
+func (m content) Refresh(left_selected string) (content, tea.Cmd) {
+	m = NewContent()
+	if left_selected != "" {
+		m.choices = []string{left_selected, left_selected, left_selected}
+	}
+
+	return m, nil
 }
 
 func (m content) Update(msg tea.Msg) (content, tea.Cmd) {
@@ -77,6 +78,10 @@ func (m content) View() string {
 		}
 
 		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	}
+
+	if s == "" {
+		s += "Welcome to Alexandria!"
 	}
 
 	return s

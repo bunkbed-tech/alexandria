@@ -1,4 +1,4 @@
-module practice-cli
+module alexandria-cli
 
 go 1.22.5
 
