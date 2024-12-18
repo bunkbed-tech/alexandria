@@ -1,8 +1,8 @@
 <script lang="ts">
-import * as Alert from "$lib/components/ui/alert";
-import CircleAlert from "lucide-svelte/icons/circle-alert";
+import * as Alert from "$lib/components/ui/alert"
+import CircleAlert from "lucide-svelte/icons/circle-alert"
 
-export let error: string;
+export let error: string
 </script>
 
 <Alert.Root variant="destructive">

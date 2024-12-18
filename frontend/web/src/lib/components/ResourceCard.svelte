@@ -1,39 +1,37 @@
 <script lang="ts">
-import { Bookmark, Check, ChevronDown } from "lucide-svelte";
-import { createEventDispatcher } from "svelte";
-import { toast } from "svelte-sonner";
+import { Bookmark, Check, ChevronDown } from "lucide-svelte"
+import { createEventDispatcher } from "svelte"
+import { toast } from "svelte-sonner"
 
-import AlertError from "$lib/components/AlertError.svelte";
-import { Button } from "$lib/components/ui/button";
-import * as Combobox from "$lib/components/ui/combobox";
-import { Resource } from "$lib/types";
+import AlertError from "$lib/components/AlertError.svelte"
+import { Button } from "$lib/components/ui/button"
+import * as Combobox from "$lib/components/ui/combobox"
+import { Resource } from "$lib/types"
 
-export let resource: Resource;
+export let resource: Resource
 
-const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher()
 
-$: tracked = resource.id != undefined;
+$: tracked = resource.id != undefined
 
 async function toggleTrackResource() {
-	const response = tracked
-		? await fetch(`${import.meta.env.BASE_API_URL}/resource/${resource.id}`, {
-				method: "DELETE",
-			})
-		: await fetch(`${import.meta.env.BASE_API_URL}/resource`, {
-				method: "POST",
-				body: JSON.stringify({ resource }),
-			});
-	if (!response.ok) {
-		toast.custom(AlertError, {
-			componentProps: {
-				error: `${response.status} ${
-					response.statusText
-				}: ${await response.text()}`,
-			},
-		});
-	}
-	resource = Resource.create(JSON.parse(await response.json()));
-	dispatch("toggle", {});
+  const response = tracked
+    ? await fetch(`${import.meta.env.BASE_API_URL}/resource/${resource.id}`, {
+        method: "DELETE",
+      })
+    : await fetch(`${import.meta.env.BASE_API_URL}/resource`, {
+        method: "POST",
+        body: JSON.stringify({ resource }),
+      })
+  if (!response.ok) {
+    toast.custom(AlertError, {
+      componentProps: {
+        error: `${response.status} ${response.statusText}: ${await response.text()}`,
+      },
+    })
+  }
+  resource = Resource.create(JSON.parse(await response.json()))
+  dispatch("toggle", {})
 }
 </script>
 

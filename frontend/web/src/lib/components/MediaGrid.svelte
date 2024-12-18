@@ -1,117 +1,103 @@
 <script lang="ts">
-import Fuse from "fuse.js";
-import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpAZ } from "lucide-svelte";
+import Fuse from "fuse.js"
+import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpAZ } from "lucide-svelte"
 
-import Pagination from "$lib/components/Pagination.svelte";
-import ResourceCards from "$lib/components/ResourceCards.svelte";
-import { Button } from "$lib/components/ui/button";
-import * as Dialog from "$lib/components/ui/dialog";
-import { Input } from "$lib/components/ui/input";
-import { Label } from "$lib/components/ui/label";
-import * as Select from "$lib/components/ui/select";
-import { Skeleton } from "$lib/components/ui/skeleton";
-import { Slider } from "$lib/components/ui/slider";
-import * as Tabs from "$lib/components/ui/tabs";
-import type { Resource } from "$lib/types";
+import Pagination from "$lib/components/Pagination.svelte"
+import ResourceCards from "$lib/components/ResourceCards.svelte"
+import { Button } from "$lib/components/ui/button"
+import * as Dialog from "$lib/components/ui/dialog"
+import { Input } from "$lib/components/ui/input"
+import { Label } from "$lib/components/ui/label"
+import * as Select from "$lib/components/ui/select"
+import { Skeleton } from "$lib/components/ui/skeleton"
+import { Slider } from "$lib/components/ui/slider"
+import * as Tabs from "$lib/components/ui/tabs"
+import type { Resource } from "$lib/types"
 
-const perPage = 20;
-const sorters = ["default", "alphabetical", "year", "tracked"] as const;
-type Sorter = (typeof sorters)[number];
+const perPage = 20
+const sorters = ["default", "alphabetical", "year", "tracked"] as const
+type Sorter = (typeof sorters)[number]
 const sorterCompareFns: Record<Sorter, (a: Resource, b: Resource) => number> = {
-	default: (_a, _b) => 0,
-	alphabetical: (a, b) => {
-		// Uppercase everything to be case-insensitive
-		const titleA = a.title.toUpperCase();
-		const titleB = b.title.toUpperCase();
-		if (titleA < titleB) return -1;
-		if (titleA > titleB) return 1;
-		return 0;
-	},
-	year: (a, b) =>
-		(a.year_published || Number.POSITIVE_INFINITY) -
-		(b.year_published || Number.POSITIVE_INFINITY),
-	tracked: (a, b) => +!!b.id - +!!a.id,
-};
+  default: (_a, _b) => 0,
+  alphabetical: (a, b) => {
+    // Uppercase everything to be case-insensitive
+    const titleA = a.title.toUpperCase()
+    const titleB = b.title.toUpperCase()
+    if (titleA < titleB) return -1
+    if (titleA > titleB) return 1
+    return 0
+  },
+  year: (a, b) => (a.year_published || Number.POSITIVE_INFINITY) - (b.year_published || Number.POSITIVE_INFINITY),
+  tracked: (a, b) => +!!b.id - +!!a.id,
+}
 
-export const filterPageResources: (_: Resource[]) => Resource[] = (a) => a;
-export const searchOnMount = false;
-export let searcher: () => Promise<Resource[]>;
-export const query = "";
-export let title: string;
+export const filterPageResources: (_: Resource[]) => Resource[] = a => a
+export const searchOnMount = false
+export let searcher: () => Promise<Resource[]>
+export const query = ""
+export let title: string
 
-const promise: Promise<void> | null = searchOnMount ? searchAndFilter() : null;
-const page = 1;
-let resources: Resource[] = [];
-let filteredResources: Resource[] = [];
-const sort = { value: "default" as Sorter };
-const reverseOrder = false;
+const promise: Promise<void> | null = searchOnMount ? searchAndFilter() : null
+const page = 1
+let resources: Resource[] = []
+let filteredResources: Resource[] = []
+const sort = { value: "default" as Sorter }
+const reverseOrder = false
 
 $: min = resources.reduce(
-	(min, resource) =>
-		resource.year_published && resource.year_published < min
-			? resource.year_published
-			: min,
-	Number.POSITIVE_INFINITY,
-);
+  (min, resource) => (resource.year_published && resource.year_published < min ? resource.year_published : min),
+  Number.POSITIVE_INFINITY,
+)
 $: max = resources.reduce(
-	(max, resource) =>
-		resource.year_published && resource.year_published > max
-			? resource.year_published
-			: max,
-	Number.NEGATIVE_INFINITY,
-);
-$: yearPublishedRange = [min, max] as [number, number];
+  (max, resource) => (resource.year_published && resource.year_published > max ? resource.year_published : max),
+  Number.NEGATIVE_INFINITY,
+)
+$: yearPublishedRange = [min, max] as [number, number]
 $: {
-	filteredResources = resources
-		// Year published within slider range (keep all nulls)
-		.filter(
-			(result) =>
-				result.year_published == null ||
-				(result.year_published >= yearPublishedRange[0] &&
-					result.year_published <= yearPublishedRange[1]),
-		)
-		// Sort the results by the specified feature
-		.sort(sorterCompareFns[sort.value]);
-	filteredResources = reverseOrder
-		? filteredResources.reverse()
-		: filteredResources;
+  filteredResources = resources
+    // Year published within slider range (keep all nulls)
+    .filter(
+      result =>
+        result.year_published == null ||
+        (result.year_published >= yearPublishedRange[0] && result.year_published <= yearPublishedRange[1]),
+    )
+    // Sort the results by the specified feature
+    .sort(sorterCompareFns[sort.value])
+  filteredResources = reverseOrder ? filteredResources.reverse() : filteredResources
 }
-$: pageResources = filteredResources.slice(
-	perPage * (page - 1),
-	perPage * page,
-);
+$: pageResources = filteredResources.slice(perPage * (page - 1), perPage * page)
 
 async function searchAndFilter() {
-	const endpoint_resources = await searcher();
+  const endpoint_resources = await searcher()
 
-	if (query === "") {
-		resources = endpoint_resources;
-	} else {
-		// Fuzzy search
-		const options = {
-			includeScore: true,
-			keys: [
-				{
-					name: "title",
-					weight: 0.9,
-				},
-				{
-					name: "description",
-					weight: 0.1,
-				},
-			],
-		};
-		const fuse = new Fuse(endpoint_resources, options);
-		resources = fuse.search(query).map((result) => result.item);
-	}
+  if (query === "") {
+    resources = endpoint_resources
+  } else {
+    // Fuzzy search
+    const options = {
+      includeScore: true,
+      keys: [
+        {
+          name: "title",
+          weight: 0.9,
+        },
+        {
+          name: "description",
+          weight: 0.1,
+        },
+      ],
+    }
+    const fuse = new Fuse(endpoint_resources, options)
+    resources = fuse.search(query).map(result => result.item)
+  }
 }
 
 function onToggleResource() {
-	resources = [
-		...resources.slice(0, perPage * (page - 1)),
-		...filterPageResources(pageResources),
-		...resources.slice(perPage * page),
-	];
+  resources = [
+    ...resources.slice(0, perPage * (page - 1)),
+    ...filterPageResources(pageResources),
+    ...resources.slice(perPage * page),
+  ]
 }
 </script>
 

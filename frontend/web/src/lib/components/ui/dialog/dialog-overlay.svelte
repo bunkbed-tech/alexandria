@@ -1,16 +1,16 @@
 <script lang="ts">
-import { cn } from "$lib/utils.js";
-import type { Dialog as DialogPrimitive } from "bits-ui";
-import { fade } from "svelte/transition";
+import { cn } from "$lib/utils.js"
+import type { Dialog as DialogPrimitive } from "bits-ui"
+import { fade } from "svelte/transition"
 
-type $$Props = DialogPrimitive.OverlayProps;
+type $$Props = DialogPrimitive.OverlayProps
 
-const className: $$Props["class"] = undefined;
-export const transition: $$Props["transition"] = fade;
+const className: $$Props["class"] = undefined
+export const transition: $$Props["transition"] = fade
 export const transitionConfig: $$Props["transitionConfig"] = {
-	duration: 150,
-};
-export { className as class };
+  duration: 150,
+}
+export { className as class }
 </script>
 
 <DialogPrimitive.Overlay

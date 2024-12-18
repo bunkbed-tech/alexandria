@@ -1,12 +1,9 @@
 use actix_web::{
     delete, get, post,
-    Responder, HttpResponse,
-    web::{
-        resource,
-        Data, Json, Path,
-    },
+    Responder,
+    web::{Data, Json, Path, Query},
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::postgres::PgPool;
 
 use crate::{
@@ -15,21 +12,14 @@ use crate::{
     state::AppState,
 };
 
-pub const resource_resource = {
-    resource("/resource")
-        .register(resource_list)
-        .register(resource_track)
-        .register(resource_untrack)
-};
-
 #[get("/")]
 async fn resource_list(data: Data<AppState>, params: Query<IdsParams>) -> impl Responder {
-    respond(list_resources(&data.db, params.ids).await)
+    respond(list_resources(&data.db, &params.ids).await)
 }
 
 #[post("/")]
 async fn resource_track(data: Data<AppState>, json: Json<ResourceData>) -> impl Responder {
-    respond(track_resource(&data.db, json.resource).await)
+    respond(track_resource(&data.db, &json.resource).await)
 }
 
 #[delete("/{id}")]
@@ -39,11 +29,11 @@ async fn resource_untrack(data: Data<AppState>, path: Path<i32>) -> impl Respond
 
 async fn list_resources(
     pool: &PgPool,
-    ids: Option<Vec<i32>>,
+    ids: &Option<Vec<i32>>,
 ) -> Result<Vec<Resource>, String> {
     let rows: Vec<Resource>;
     if let Some(bgg_ids) = ids {
-        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#, &bgg_ids)
+        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#, bgg_ids)
             .fetch_all(pool)
             .await
             .expect("Unable to list resources")
@@ -58,7 +48,7 @@ async fn list_resources(
 
 async fn track_resource(
     pool: &PgPool,
-    resource: Resource,
+    resource: &Resource,
 ) -> Result<Resource, String> {
     if let Some(_) = resource.id {
         return Err(format!("Resource {} is already tracked.", resource))

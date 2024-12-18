@@ -1,8 +1,8 @@
 <script lang="ts">
-import ResourceCard from "$lib/components/ResourceCard.svelte";
-import type { Resource } from "$lib/types";
+import ResourceCard from "$lib/components/ResourceCard.svelte"
+import type { Resource } from "$lib/types"
 
-export let resources: Resource[];
+export let resources: Resource[]
 </script>
 
 <div class="resource-grid flex flex-wrap justify-between gap-3">

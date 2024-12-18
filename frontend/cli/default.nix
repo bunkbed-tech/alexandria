@@ -7,14 +7,8 @@
       vendorHash = "";
       meta.mainProgram = "alexandria-cli";
     };
-    canivete.devShell.packages = [pkgs.go];
-    canivete.pre-commit.settings.hooks.golangci-lint = {
-      enable = true;
-      raw.args = [
-        "--config"
-        (pkgs.writers.writeYAML "golangci-lint.yaml" {linters.enable = ["revive"];})
-      ];
-    };
+    canivete.devShells.shells.default.packages = [pkgs.go];
+    canivete.pre-commit.languages.golang.enable = true;
     canivete.process-compose.services.settings.processes.cli.command = "${pkgs.go}/bin/go run";
   };
 }

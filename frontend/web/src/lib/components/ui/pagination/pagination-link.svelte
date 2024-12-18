@@ -1,21 +1,21 @@
 <script lang="ts">
-import { type Props, buttonVariants } from "$lib/components/ui/button/index.js";
-import { cn } from "$lib/utils.js";
-import type { Pagination as PaginationPrimitive } from "bits-ui";
+import { type Props, buttonVariants } from "$lib/components/ui/button/index.js"
+import { cn } from "$lib/utils.js"
+import type { Pagination as PaginationPrimitive } from "bits-ui"
 
 type $$Props = PaginationPrimitive.PageProps &
-	Props & {
-		isActive: boolean;
-	};
+  Props & {
+    isActive: boolean
+  }
 
-type $$Events = PaginationPrimitive.PageEvents;
+type $$Events = PaginationPrimitive.PageEvents
 
-const className: $$Props["class"] = undefined;
-export let page: $$Props["page"];
-export const size: $$Props["size"] = "icon";
-export const isActive: $$Props["isActive"] = false;
+const className: $$Props["class"] = undefined
+export let page: $$Props["page"]
+export const size: $$Props["size"] = "icon"
+export const isActive: $$Props["isActive"] = false
 
-export { className as class };
+export { className as class }
 </script>
 
 <PaginationPrimitive.Page

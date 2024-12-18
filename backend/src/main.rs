@@ -6,8 +6,8 @@ use sqlx::{postgres::PgPoolOptions};
 use alexandria::{
     state::AppState,
     services::{
-        bgg::bgg_resource,
-        resource::resource_resource,
+        bgg::bgg_scope,
+        resource::resource_scope,
     },
 };
 
@@ -23,8 +23,8 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(AppState { db: pool.clone() }))
-            .service(bgg_resource)
-            .service(resource_resource)
+            .service(bgg_scope)
+            .service(resource_scope)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

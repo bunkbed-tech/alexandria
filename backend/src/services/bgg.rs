@@ -4,11 +4,8 @@ use std::slice::Chunks;
 
 use actix_web::{
     get,
-    Responder, HttpResponse,
-    web::{
-        resource,
-        Query,
-    },
+    HttpResponse, Responder,
+    web::Query,
 };
 use quick_xml::de::from_str;
 use reqwest::get as rget;
@@ -19,31 +16,24 @@ use crate::{
     models::Resource,
 };
 
-pub const bgg_resource = {
-    resource("/bgg")
-        .register(bgg_search)
-        .register(bgg_things_list)
-        .register(bgg_things_search)
-};
-
 #[get("/search")]
 async fn bgg_search(params: Query<QueryParams>) -> impl Responder {
-    respond(search_bgg(params.query).await)
+    respond(search_bgg(&params.query).await)
 }
 
 #[get("/things")]
 async fn bgg_things_list(params: Query<IdsParams>) -> impl Responder {
-    respond(list_bgg_things(params.ids).await)
+    respond(list_bgg_things(&params.ids).await)
 }
 
 #[get("/things/search")]
 async fn bgg_things_search(params: Query<QueryParams>) -> impl Responder {
-    let (resources, errors) = search_bgg_things(params.query).await;
+    let (resources, errors) = search_bgg_things(&params.query).await;
     HttpResponse::Ok().json(SearchThingsResults {resources, errors})
 }
 
-async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
-    let search_xml = bgg_search_xml(&query).await?;
+async fn search_bgg(query: &String) -> Result<Vec<i32>, String> {
+    let search_xml = bgg_search_xml(query).await?;
     let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string() + &search_xml)?;
     // The search API returns duplicates (no idea why), so we deduplicate with a HashSet and sort for a guaranteed order
     Ok(search_items
@@ -56,8 +46,8 @@ async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
         .collect::<Vec<_>>())
 }
 
-async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
-    let thing_xml = bgg_thing_xml(&ids).await?;
+async fn list_bgg_things(ids: &Vec<i32>) -> Result<Vec<Resource>, String> {
+    let thing_xml = bgg_thing_xml(ids).await?;
     let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
     let mut resources: Vec<_> = thing_items
         .item
@@ -80,7 +70,7 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
                 .yearpublished
                 .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
             thumbnail: thing.thumbnail.map(|thumbnail| thumbnail.value),
-            bgg_id: id,
+            bgg_id: *id,
         })
         .collect::<HashSet<_>>()
         .into_iter()
@@ -90,7 +80,7 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
     Ok(resources)
 }
 
-async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
+async fn search_bgg_things(query: &String) -> (Vec<Resource>, Vec<String>) {
     match search_bgg(query).await {
         Ok(resource_ids) => {
             // BGG /thing API has a limit of 20 IDs, so we chunk the IDs
@@ -135,7 +125,7 @@ async fn bgg_search_xml(query: &String) -> Result<String, String> {
 
 // We couldn't include "impl Future" outside of a function signature, so we had to write this -_-
 fn list_bgg_things_chunks(chunks: Chunks<'_, i32>) -> Vec<impl Future<Output = Result<Vec<Resource>, String>>> {
-    chunks.map(|chunk| list_bgg_things(chunk.to_vec())).collect()
+    chunks.map(|chunk| list_bgg_things(&chunk.to_vec())).collect()
 }
 
 #[derive(Deserialize)]
@@ -151,7 +141,7 @@ struct QueryParams {
 #[derive(Serialize)]
 struct SearchThingsResults {
     resources: Vec<Resource>,
-    errors: Vec<Strings>,
+    errors: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]

@@ -4,8 +4,9 @@
     pkgs,
     ...
   }: {
-    canivete.devShell.packages = [pkgs.bun];
-    canivete.dream2nix.alexandria-web.module = {
+    # TODO propagate bun to flake devshell from dream2nix package devshell
+    canivete.devShells.shells.default.packages = [pkgs.bun];
+    canivete.dream2nix.packages.web.module = {
       config,
       dream2nix,
       ...
@@ -58,14 +59,17 @@
     };
     canivete.pre-commit = {
       languages.javascript.enable = true;
-      # Also run biome on .svelte files
-      settings.hooks.biome.types_or = ["svelte"];
-      settings.hooks.lychee.settings.flags = lib.concatStringsSep " " [
-        # Exclude hardcoded localhost links
-        "--exclude localhost"
-        # Remap sveltekit assets to correct folder for static link checking
-        "--remap 'src/%25sveltekit.assets%25 static'"
-      ];
+      settings.hooks = {
+        biome.entry = "sh -c 'cd frontend/web && ${lib.getExe pkgs.biome} check --write .'";
+        biome.pass_filenames = false;
+        biome.types_or = ["svelte"];
+        lychee.settings.flags = lib.concatStringsSep " " [
+          # Exclude hardcoded localhost links
+          "--exclude localhost"
+          # Remap sveltekit assets to correct folder for static link checking
+          "--remap 'src/%25sveltekit.assets%25 static'"
+        ];
+      };
     };
   };
 }

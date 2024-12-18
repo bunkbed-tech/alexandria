@@ -1,10 +1,10 @@
 <script lang="ts">
-import { flyAndScale } from "$lib/utils";
-import type { Combobox as ComboboxPrimitive } from "bits-ui";
+import { flyAndScale } from "$lib/utils"
+import type { Combobox as ComboboxPrimitive } from "bits-ui"
 
-type $$Props = ComboboxPrimitive.ContentProps;
+type $$Props = ComboboxPrimitive.ContentProps
 
-export const transition: $$Props["transition"] = flyAndScale;
+export const transition: $$Props["transition"] = flyAndScale
 </script>
 
 <ComboboxPrimitive.Content

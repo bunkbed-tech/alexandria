@@ -1,11 +1,11 @@
 <script lang="ts">
-import "../app.css";
-import { page } from "$app/stores";
-import * as Collapsible from "$lib/components/ui/collapsible";
-import { Toaster } from "$lib/components/ui/sonner";
-import { ChevronDown, ChevronUp, Search } from "lucide-svelte";
+import "../app.css"
+import { page } from "$app/stores"
+import * as Collapsible from "$lib/components/ui/collapsible"
+import { Toaster } from "$lib/components/ui/sonner"
+import { ChevronDown, ChevronUp, Search } from "lucide-svelte"
 
-const open = false;
+const open = false
 </script>
 
 <Toaster />

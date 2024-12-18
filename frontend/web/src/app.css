@@ -38,13 +38,13 @@
     @apply border-border;
 
     @font-face {
-      font-family: "Bungee Tint";
+      font-family: "Bungee Tint", Arial, Helvetica, sans-serif;
       font-style: normal;
       font-weight: 400;
       src: url(https://fonts.googleapis.com/css2?family=Bungee+Tint&display=swap);
     }
 
-    font-family: "Bungee Tint";
+    font-family: "Bungee Tint", Arial, Helvetica, sans-serif;
   }
   body {
     @apply bg-background text-foreground;
