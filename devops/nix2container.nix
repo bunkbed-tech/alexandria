@@ -24,6 +24,7 @@
         };
       });
     };
+    # config.canivete.just.recipes."arion *ARGS" = "${getExe config.canivete.arion.projects.arion.finalPackage} {{ ARGS }}";
     config.canivete.arion.projects.arion.modules.default = {self'', ...}: {
       services = flip mapAttrs self'.packages (_: package: {image.command = [(getExe package)];});
     };

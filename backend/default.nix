@@ -8,8 +8,9 @@
       pre-commit.languages.rust.enable = true;
       pre-commit.settings = {config, ...}: {
         hooks = {
-          clippy.entry = "sh -c 'cd backend && ${lib.getExe' config.hooks.clippy.package "cargo-clippy"} clippy --offline --'";
-          clippy.pass_filenames = false;
+          clippy.entry = "sh -c 'cd backend && ${lib.getExe' config.hooks.clippy.package "cargo-clippy"} clippy --offline -- \"$@\"'";
+          rustfmt.entry = "sh -c 'cd backend && ${lib.getExe' config.hooks.rustfmt.package "cargo-fmt"} fmt -- \"$@\"'";
+          taplo.entry = "sh -c 'cd backend && ${lib.getExe config.hooks.taplo.package} fmt \"$@\"'";
         };
       };
       dream2nix.packages.alexandria-backend.module = {

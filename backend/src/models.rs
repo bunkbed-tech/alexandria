@@ -27,6 +27,12 @@ pub struct Tagging {
 
 impl Display for Resource {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} ({})", self.title, self.id.map_or(String::from("untracked"), |id| id.to_string()))
+        write!(
+            f,
+            "{} ({})",
+            self.title,
+            self.id
+                .map_or(String::from("untracked"), |id| id.to_string())
+        )
     }
 }

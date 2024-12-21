@@ -1,40 +1,34 @@
 use futures::Future;
-use std::collections::HashSet;
-use std::slice::Chunks;
+use std::{collections::HashSet, slice::Chunks, str::FromStr};
 
-use actix_web::{
-    get,
-    HttpResponse, Responder,
-    web::Query,
-};
+use actix_web::{get, web::Query, HttpResponse, Responder};
 use quick_xml::de::from_str;
 use reqwest::get as rget;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
-use crate::{
-    http::respond,
-    models::Resource,
-};
+use crate::{http::respond, models::Resource};
 
 #[get("/search")]
-async fn bgg_search(params: Query<QueryParams>) -> impl Responder {
-    respond(search_bgg(&params.query).await)
+pub async fn bgg_search(Query(params): Query<QueryParams>) -> impl Responder {
+    respond(search_bgg(params.query).await)
 }
 
 #[get("/things")]
-async fn bgg_things_list(params: Query<IdsParams>) -> impl Responder {
-    respond(list_bgg_things(&params.ids).await)
+pub async fn bgg_things_list(Query(params): Query<IdsParams>) -> impl Responder {
+    respond(list_bgg_things(params.ids).await)
 }
 
 #[get("/things/search")]
-async fn bgg_things_search(params: Query<QueryParams>) -> impl Responder {
-    let (resources, errors) = search_bgg_things(&params.query).await;
-    HttpResponse::Ok().json(SearchThingsResults {resources, errors})
+pub async fn bgg_things_search(Query(params): Query<QueryParams>) -> impl Responder {
+    let (resources, errors) = search_bgg_things(params.query).await;
+    HttpResponse::Ok().json(SearchThingsResults { resources, errors })
 }
 
-async fn search_bgg(query: &String) -> Result<Vec<i32>, String> {
+async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
     let search_xml = bgg_search_xml(query).await?;
-    let search_items: SearchItems = from_str(&search_xml).map_err(|err| String::from("[search_bgg:search_items:from_str] ") + &err.to_string() + &search_xml)?;
+    let search_items: SearchItems = from_str(&search_xml).map_err(|err| {
+        String::from("[search_bgg:search_items:from_str] ") + &err.to_string() + &search_xml
+    })?;
     // The search API returns duplicates (no idea why), so we deduplicate with a HashSet and sort for a guaranteed order
     Ok(search_items
         .item
@@ -46,9 +40,11 @@ async fn search_bgg(query: &String) -> Result<Vec<i32>, String> {
         .collect::<Vec<_>>())
 }
 
-async fn list_bgg_things(ids: &Vec<i32>) -> Result<Vec<Resource>, String> {
-    let thing_xml = bgg_thing_xml(ids).await?;
-    let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml)?;
+async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
+    let thing_xml = bgg_thing_xml(ids.clone()).await?;
+    let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| {
+        String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml
+    })?;
     let mut resources: Vec<_> = thing_items
         .item
         .unwrap_or_else(Vec::new)
@@ -70,7 +66,7 @@ async fn list_bgg_things(ids: &Vec<i32>) -> Result<Vec<Resource>, String> {
                 .yearpublished
                 .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
             thumbnail: thing.thumbnail.map(|thumbnail| thumbnail.value),
-            bgg_id: *id,
+            bgg_id: id,
         })
         .collect::<HashSet<_>>()
         .into_iter()
@@ -80,29 +76,41 @@ async fn list_bgg_things(ids: &Vec<i32>) -> Result<Vec<Resource>, String> {
     Ok(resources)
 }
 
-async fn search_bgg_things(query: &String) -> (Vec<Resource>, Vec<String>) {
+async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
     match search_bgg(query).await {
         Ok(resource_ids) => {
             // BGG /thing API has a limit of 20 IDs, so we chunk the IDs
             // We also limit the number of resources to 100 so as not to take too long
             let maximum_resource_ids = &resource_ids[..100.min(resource_ids.len())];
-            let chunk_results: Vec<Result<Vec<Resource>, String>> = futures::future::join_all(list_bgg_things_chunks(maximum_resource_ids.chunks(20))).await;
-            let (successes, errors): (Vec<Result<Vec<Resource>, String>>, Vec<Result<Vec<Resource>, String>>) = chunk_results.into_iter().partition(|result| result.is_ok());
-            let successes: Vec<Resource> = successes.into_iter().map(|r| r.unwrap()).flatten().collect();
+            let chunk_results: Vec<Result<Vec<Resource>, String>> =
+                futures::future::join_all(list_bgg_things_chunks(maximum_resource_ids.chunks(20)))
+                    .await;
+            let (successes, errors): (
+                Vec<Result<Vec<Resource>, String>>,
+                Vec<Result<Vec<Resource>, String>>,
+            ) = chunk_results.into_iter().partition(|result| result.is_ok());
+            let successes: Vec<Resource> = successes
+                .into_iter()
+                .map(|r| r.unwrap())
+                .flatten()
+                .collect();
             let errors: Vec<String> = errors.into_iter().map(|r| r.unwrap_err()).collect();
             (successes, errors)
-        },
+        }
         Err(error) => {
             let empty_results: Vec<Resource> = Vec::new();
             (empty_results, vec![error])
-        },
+        }
     }
 }
 
-async fn bgg_thing_xml(ids: &Vec<i32>) -> Result<String, String> {
+async fn bgg_thing_xml(ids: Vec<i32>) -> Result<String, String> {
     rget(format!(
         "https://boardgamegeek.com/xmlapi2/thing?id={}",
-        ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
+        ids.iter()
+            .map(|id| id.to_string())
+            .collect::<Vec<String>>()
+            .join(",")
     ))
     .await
     .map_err(|err| String::from("[bgg_thing_xml:_:get] ") + &err.to_string())?
@@ -111,7 +119,7 @@ async fn bgg_thing_xml(ids: &Vec<i32>) -> Result<String, String> {
     .map_err(|err| String::from("[bgg_thing_xml:_:text] ") + &err.to_string())
 }
 
-async fn bgg_search_xml(query: &String) -> Result<String, String> {
+async fn bgg_search_xml(query: String) -> Result<String, String> {
     rget(format!(
         "https://boardgamegeek.com/xmlapi2/search?query={}",
         query
@@ -124,12 +132,26 @@ async fn bgg_search_xml(query: &String) -> Result<String, String> {
 }
 
 // We couldn't include "impl Future" outside of a function signature, so we had to write this -_-
-fn list_bgg_things_chunks(chunks: Chunks<'_, i32>) -> Vec<impl Future<Output = Result<Vec<Resource>, String>>> {
-    chunks.map(|chunk| list_bgg_things(&chunk.to_vec())).collect()
+fn list_bgg_things_chunks(
+    chunks: Chunks<'_, i32>,
+) -> Vec<impl Future<Output = Result<Vec<Resource>, String>>> {
+    chunks
+        .map(|chunk| list_bgg_things(chunk.to_vec()))
+        .collect()
+}
+
+fn csv_ids<'de, D>(deserializer: D) -> Result<Vec<i32>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let string: &str = Deserialize::deserialize(deserializer)?;
+    let result: Result<Vec<i32>, _> = string.split(",").map(|v| i32::from_str(v.trim())).collect();
+    result.map_err(serde::de::Error::custom)
 }
 
 #[derive(Deserialize)]
 struct IdsParams {
+    #[serde(deserialize_with = "csv_ids")]
     ids: Vec<i32>,
 }
 
@@ -197,8 +219,7 @@ struct ThingItems {
 
 #[cfg(test)]
 mod tests {
-    // TODO replace this with tokio?
-    use async_std::test;
+    use actix_web::test;
     use regex::Regex;
 
     use super::*;
@@ -213,7 +234,7 @@ mod tests {
 
     #[test]
     async fn test_bgg_search_xml() {
-        let xml = bgg_search_xml(&String::from("scythe")).await.unwrap();
+        let xml = bgg_search_xml(String::from("scythe")).await.unwrap();
         let trimmed_xml = trim_xml(&xml);
         let items = [
             r#"<item type="boardgame" id="398158"><name type="primary" value="Grind House: Scythes Out"/><yearpublished value="2023"/></item>"#,
@@ -224,7 +245,7 @@ mod tests {
 
     #[test]
     async fn test_bgg_thing_xml() {
-        let xml = bgg_thing_xml(&vec![398158]).await.unwrap();
+        let xml = bgg_thing_xml(vec![398158]).await.unwrap();
         let trimmed_xml = trim_xml(&xml);
         let items = [
             r#"<name type="primary" sortindex="1" value="Grind House: Scythes Out"/>"#,

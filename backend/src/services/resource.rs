@@ -1,42 +1,47 @@
+use std::str::FromStr;
+
 use actix_web::{
     delete, get, post,
-    Responder,
     web::{Data, Json, Path, Query},
+    Responder,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use sqlx::postgres::PgPool;
 
-use crate::{
-    http::respond,
-    models::Resource,
-    state::AppState,
-};
+use crate::{http::respond, models::Resource, state::AppState};
 
 #[get("/")]
-async fn resource_list(data: Data<AppState>, params: Query<IdsParams>) -> impl Responder {
-    respond(list_resources(&data.db, &params.ids).await)
+pub async fn resource_list(
+    data: Data<AppState>,
+    Query(params): Query<IdsParams>,
+) -> impl Responder {
+    respond(list_resources(&data.db, params.ids).await)
 }
 
 #[post("/")]
-async fn resource_track(data: Data<AppState>, json: Json<ResourceData>) -> impl Responder {
-    respond(track_resource(&data.db, &json.resource).await)
+pub async fn resource_track(
+    data: Data<AppState>,
+    Json(json): Json<ResourceData>,
+) -> impl Responder {
+    respond(track_resource(&data.db, json.resource).await)
 }
 
 #[delete("/{id}")]
-async fn resource_untrack(data: Data<AppState>, path: Path<i32>) -> impl Responder {
+pub async fn resource_untrack(data: Data<AppState>, path: Path<i32>) -> impl Responder {
     respond(untrack_resource(&data.db, path.into_inner()).await)
 }
 
-async fn list_resources(
-    pool: &PgPool,
-    ids: &Option<Vec<i32>>,
-) -> Result<Vec<Resource>, String> {
+async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<Resource>, String> {
     let rows: Vec<Resource>;
     if let Some(bgg_ids) = ids {
-        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#, bgg_ids)
-            .fetch_all(pool)
-            .await
-            .expect("Unable to list resources")
+        rows = sqlx::query_as!(
+            Resource,
+            r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#,
+            &bgg_ids
+        )
+        .fetch_all(pool)
+        .await
+        .expect("Unable to list resources")
     } else {
         rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource"#)
             .fetch_all(pool)
@@ -46,12 +51,9 @@ async fn list_resources(
     Ok(rows)
 }
 
-async fn track_resource(
-    pool: &PgPool,
-    resource: &Resource,
-) -> Result<Resource, String> {
+async fn track_resource(pool: &PgPool, resource: Resource) -> Result<Resource, String> {
     if let Some(_) = resource.id {
-        return Err(format!("Resource {} is already tracked.", resource))
+        return Err(format!("Resource {} is already tracked.", resource));
     }
     let db_resource = {
         sqlx::query_as!(
@@ -69,10 +71,7 @@ async fn track_resource(
     Ok(db_resource)
 }
 
-async fn untrack_resource(
-    pool: &PgPool,
-    id: i32,
-) -> Result<Resource, String> {
+async fn untrack_resource(pool: &PgPool, id: i32) -> Result<Resource, String> {
     let mut resource = {
         sqlx::query_as!(
             Resource,
@@ -87,6 +86,20 @@ async fn untrack_resource(
     Ok(resource)
 }
 
+fn csv_ids<'de, D>(deserializer: D) -> Result<Option<Vec<i32>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match Option::<&str>::deserialize(deserializer)? {
+        Some(string) => {
+            let result: Result<Vec<i32>, _> =
+                string.split(",").map(|v| i32::from_str(v.trim())).collect();
+            result.map(Some).map_err(serde::de::Error::custom)
+        }
+        None => Ok(None),
+    }
+}
+
 #[derive(Deserialize)]
 struct ResourceData {
     resource: Resource,
@@ -94,35 +107,36 @@ struct ResourceData {
 
 #[derive(Deserialize)]
 struct IdsParams {
+    #[serde(deserialize_with = "csv_ids")]
     ids: Option<Vec<i32>>,
 }
 
 #[cfg(test)]
 mod tests {
-    use sqlx::test;
     use super::*;
+    use sqlx::test;
 
     #[test(fixtures(path = "../../fixtures", scripts("resources")))]
     async fn test_list_resources_all(pool: PgPool) {
         let ids: Option<Vec<i32>> = None;
         let resources = list_resources(&pool, ids).await.unwrap();
         let expected_resources = vec![
-          Resource {
-              id: Some(1),
-              title: String::from("Scythe"),
-              description: Some(String::from("Really good game")),
-              year_published: Some(2015),
-              thumbnail: Some(String::from("https://google.com")),
-              bgg_id: 9000,
-          },
-          Resource {
-              id: Some(2),
-              title: String::from("Cranium Cadoo"),
-              description: None,
-              year_published: None,
-              thumbnail: None,
-              bgg_id: 420,
-          },
+            Resource {
+                id: Some(1),
+                title: String::from("Scythe"),
+                description: Some(String::from("Really good game")),
+                year_published: Some(2015),
+                thumbnail: Some(String::from("https://google.com")),
+                bgg_id: 9000,
+            },
+            Resource {
+                id: Some(2),
+                title: String::from("Cranium Cadoo"),
+                description: None,
+                year_published: None,
+                thumbnail: None,
+                bgg_id: 420,
+            },
         ];
         assert_eq!(resources, expected_resources);
     }
@@ -139,16 +153,14 @@ mod tests {
     async fn test_list_resources_some(pool: PgPool) {
         let ids = Some(vec![9000]);
         let resources = list_resources(&pool, ids).await.unwrap();
-        let expected_resources = vec![
-          Resource {
-              id: Some(1),
-              title: String::from("Scythe"),
-              description: Some(String::from("Really good game")),
-              year_published: Some(2015),
-              thumbnail: Some(String::from("https://google.com")),
-              bgg_id: 9000,
-          },
-        ];
+        let expected_resources = vec![Resource {
+            id: Some(1),
+            title: String::from("Scythe"),
+            description: Some(String::from("Really good game")),
+            year_published: Some(2015),
+            thumbnail: Some(String::from("https://google.com")),
+            bgg_id: 9000,
+        }];
         assert_eq!(resources, expected_resources);
     }
 
@@ -212,7 +224,9 @@ mod tests {
             thumbnail: Some(String::from("https://google.com")),
             bgg_id: 9000,
         };
-        let untracked_resource = untrack_resource(&pool, tracked_resource.id.unwrap()).await.unwrap();
+        let untracked_resource = untrack_resource(&pool, tracked_resource.id.unwrap())
+            .await
+            .unwrap();
         let expected_untracked_resource = Resource {
             id: None,
             title: String::from("Scythe"),

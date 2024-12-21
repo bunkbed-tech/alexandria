@@ -60,8 +60,7 @@
     canivete.pre-commit = {
       languages.javascript.enable = true;
       settings.hooks = {
-        biome.entry = "sh -c 'cd frontend/web && ${lib.getExe pkgs.biome} check --write .'";
-        biome.pass_filenames = false;
+        biome.entry = "sh -c 'cd frontend/web && ${lib.getExe pkgs.biome} check --write \"$@\"'";
         biome.types_or = ["svelte"];
         lychee.settings.flags = lib.concatStringsSep " " [
           # Exclude hardcoded localhost links
