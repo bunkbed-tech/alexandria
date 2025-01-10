@@ -21,7 +21,7 @@ async function searchBggThings() {
   }
 
   // Match with resources already tracked in database
-  const ids = api_resources.map(resource => resource.bgg_id)
+  const ids = api_resources.map(resource => resource.api_id)
   const db_response = await fetch(`${import.meta.env.BASE_API_URL}/resource?${new URLSearchParams({ ids })}`)
   if (!db_response.ok) {
     toast.custom(AlertError, {
@@ -31,10 +31,10 @@ async function searchBggThings() {
     })
   }
   const db_resources = JSON.parse(await db_response.json()).map(Resource.create)
-  const bgg_to_db_id = db_resources.reduce((acc, resource) => acc.set(resource.bgg_id, resource.id), new Map())
+  const bgg_to_db_id = db_resources.reduce((acc, resource) => acc.set(resource.api_id, resource.id), new Map())
   const matched_resources = api_resources.map(resource => ({
     ...resource,
-    id: bgg_to_db_id.get(resource.bgg_id),
+    id: bgg_to_db_id.get(resource.api_id),
   }))
   return matched_resources
 }

@@ -33,11 +33,11 @@ pub async fn resource_untrack(data: Data<AppState>, path: Path<i32>) -> impl Res
 
 async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<Resource>, String> {
     let rows: Vec<Resource>;
-    if let Some(bgg_ids) = ids {
+    if let Some(api_ids) = ids {
         rows = sqlx::query_as!(
             Resource,
-            r#"SELECT * FROM resource WHERE bgg_id = ANY($1)"#,
-            &bgg_ids
+            r#"SELECT * FROM resource WHERE api_id = ANY($1)"#,
+            &api_ids
         )
         .fetch_all(pool)
         .await
@@ -58,12 +58,12 @@ async fn track_resource(pool: &PgPool, resource: Resource) -> Result<Resource, S
     let db_resource = {
         sqlx::query_as!(
             Resource,
-            r#"INSERT INTO resource (title, description, year_published, thumbnail, bgg_id) VALUES ($1, $2, $3, $4, $5) RETURNING *"#,
+            r#"INSERT INTO resource (title, description, year_published, thumbnail, api_id) VALUES ($1, $2, $3, $4, $5) RETURNING *"#,
             resource.title,
             resource.description,
             resource.year_published,
             resource.thumbnail,
-            resource.bgg_id,
+            resource.api_id,
         ).fetch_one(pool)
         .await
         .map_err(|err| String::from("[track_resource:db_resource:fetch_one] ") + &err.to_string())?
@@ -127,7 +127,7 @@ mod tests {
                 description: Some(String::from("Really good game")),
                 year_published: Some(2015),
                 thumbnail: Some(String::from("https://google.com")),
-                bgg_id: 9000,
+                api_id: 9000,
             },
             Resource {
                 id: Some(2),
@@ -135,7 +135,7 @@ mod tests {
                 description: None,
                 year_published: None,
                 thumbnail: None,
-                bgg_id: 420,
+                api_id: 420,
             },
         ];
         assert_eq!(resources, expected_resources);
@@ -159,7 +159,7 @@ mod tests {
             description: Some(String::from("Really good game")),
             year_published: Some(2015),
             thumbnail: Some(String::from("https://google.com")),
-            bgg_id: 9000,
+            api_id: 9000,
         }];
         assert_eq!(resources, expected_resources);
     }
@@ -172,7 +172,7 @@ mod tests {
             description: Some(String::from("Really good game")),
             year_published: Some(2015),
             thumbnail: Some(String::from("https://google.com")),
-            bgg_id: 9000,
+            api_id: 9000,
         };
         let tracked_resource = track_resource(&pool, untracked_resource).await.unwrap();
         let expected_tracked_resource = Resource {
@@ -181,7 +181,7 @@ mod tests {
             description: Some(String::from("Really good game")),
             year_published: Some(2015),
             thumbnail: Some(String::from("https://google.com")),
-            bgg_id: 9000,
+            api_id: 9000,
         };
         assert_eq!(tracked_resource, expected_tracked_resource);
     }
@@ -194,7 +194,7 @@ mod tests {
             description: Some(String::from("Really good game")),
             year_published: Some(2015),
             thumbnail: Some(String::from("https://google.com")),
-            bgg_id: 9000,
+            api_id: 9000,
         };
         assert!(track_resource(&pool, tracked_resource).await.is_err());
     }
@@ -209,7 +209,7 @@ mod tests {
             description: Some(String::from("Really good game")),
             year_published: Some(2015),
             thumbnail: Some(String::from("https://google.com")),
-            bgg_id: 9000,
+            api_id: 9000,
         };
         assert!(track_resource(&pool, untracked_resource).await.is_err());
     }
@@ -222,7 +222,7 @@ mod tests {
             description: Some(String::from("Really good game")),
             year_published: Some(2015),
             thumbnail: Some(String::from("https://google.com")),
-            bgg_id: 9000,
+            api_id: 9000,
         };
         let untracked_resource = untrack_resource(&pool, tracked_resource.id.unwrap())
             .await
@@ -233,7 +233,7 @@ mod tests {
             description: Some(String::from("Really good game")),
             year_published: Some(2015),
             thumbnail: Some(String::from("https://google.com")),
-            bgg_id: 9000,
+            api_id: 9000,
         };
         assert_eq!(untracked_resource, expected_untracked_resource);
     }

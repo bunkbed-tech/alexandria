@@ -6,7 +6,7 @@ export class Resource extends Data {
   description?: string
   year_published?: number
   thumbnail?: string
-  bgg_id!: number
+  api_id!: number
 }
 
 export class Tag extends Data {

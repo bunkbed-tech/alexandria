@@ -66,13 +66,13 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
                 .yearpublished
                 .map(|year| year.value.parse::<i32>().expect("Not a valid year")),
             thumbnail: thing.thumbnail.map(|thumbnail| thumbnail.value),
-            bgg_id: id,
+            api_id: id,
         })
         .collect::<HashSet<_>>()
         .into_iter()
         .collect();
-    // BGG doesn't return things in a reliable order, so we sort by bgg_id
-    resources.sort_by_key(|resource| resource.bgg_id);
+    // BGG doesn't return things in a reliable order, so we sort by api_id
+    resources.sort_by_key(|resource| resource.api_id);
     Ok(resources)
 }
 
@@ -281,7 +281,7 @@ mod tests {
         let expected_resources = vec![
             Resource {
                 id: None,
-                bgg_id: 6420,
+                api_id: 6420,
                 title: String::from("Cranium Cadoo"),
                 description: Some(String::from("A version of Cranium &quot;scaled down&quot; for kids, although the game should still appeal to adults who like Cranium.  Here's the manufacturer's information:&#10;&#10;&quot;With a variety of hilarious activities, Cranium Cadoo gets kids thinking, creating, giggling, grinning, and laughing like crazy as they try to get four in a row to win. With so many different activities, there is something in Cranium Cadoo that will make every kid hoot and high-five. They might even discover a talent they never knew they had!&#10;&#10;And kids just love the cool Cranium Clay, funky tokens, and especially the Secret Decoder Mask. Whether kids love to act, puzzle, sketch, sculpt, or even crack secret codes, Cranium Cadoo has something for everyone&hellip;including you!&quot;&#10;&#10;")),
                 year_published: Some(2001),
@@ -289,7 +289,7 @@ mod tests {
             },
             Resource {
                 id: None,
-                bgg_id: 14454,
+                api_id: 14454,
                 title: String::from("Cranium Cadoo Booster Box"),
                 description: Some(String::from("Booster box with 300 new cards, Clay, secret decoder mask and drawing pad.&#10;&#10;Expands:&#10;&#10;    Cranium Cadoo&#10;&#10;&#10;")),
                 year_published: Some(2001),
