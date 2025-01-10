@@ -83,3 +83,11 @@ You can preview the production build with `npm run preview`.
 3. [ ] discogs
 4. [ ] myanimelist
 5. [ ] vndb
+
+## Future reading
+
+1. overlay/modal components in bubbletea are a little complicated with a few different fragile solutions:
+
+- [bubblezone](https://github.com/lrstanley/bubblezone)
+- [lipgloss overlay](https://gist.github.com/ras0q/9bf5d81544b22302393f61206892e2cd)
+- [another lipgloss overlay](https://gist.github.com/Broderick-Westrope/b89b14770c09dda928c4a108f437b927)
