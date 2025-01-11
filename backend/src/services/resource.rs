@@ -116,7 +116,7 @@ mod tests {
     use super::*;
     use sqlx::test;
 
-    #[test(fixtures(path = "../../fixtures", scripts("resources")))]
+    #[test(fixtures("resources"))]
     async fn test_list_resources_all(pool: PgPool) {
         let ids: Option<Vec<i32>> = None;
         let resources = list_resources(&pool, ids).await.unwrap();
@@ -149,7 +149,7 @@ mod tests {
         assert_eq!(resources, expected_resources);
     }
 
-    #[test(fixtures(path = "../../fixtures", scripts("resources")))]
+    #[test(fixtures("resources"))]
     async fn test_list_resources_some(pool: PgPool) {
         let ids = Some(vec![9000]);
         let resources = list_resources(&pool, ids).await.unwrap();
@@ -199,7 +199,7 @@ mod tests {
         assert!(track_resource(&pool, tracked_resource).await.is_err());
     }
 
-    #[test(fixtures(path = "../../fixtures", scripts("resources")))]
+    #[test(fixtures("resources"))]
     async fn test_track_resource_invalid(pool: PgPool) {
         // This is invalid because the resource is already in the database, but id is None
         // This should probably only happen if we make a mistake in developing the app
@@ -214,7 +214,7 @@ mod tests {
         assert!(track_resource(&pool, untracked_resource).await.is_err());
     }
 
-    #[test(fixtures(path = "../../fixtures", scripts("resources")))]
+    #[test(fixtures("resources"))]
     async fn test_untrack_resource(pool: PgPool) {
         let tracked_resource = Resource {
             id: Some(1),
