@@ -84,8 +84,11 @@ You can preview the production build with `npm run preview`.
 3. [ ] twitch/amazon api for video games
 4. [ ] google books api
 5. [ ] Discogs
-6. [ ] MyAnimeList/AniList
+6. [ ] MyAnimeList
 7. [ ] MyDramaList
+8. [-] Anilist
+
+- [MediaRelation](https://docs.anilist.co/reference/enum/mediarelation) will allow us to associate seasons together under the same umbrella series
 
 ## Future reading
 

@@ -7,7 +7,7 @@ use actix_web::{
 use sqlx::postgres::PgPoolOptions;
 
 use alexandria::{
-    services::{bgg, resource, vndb},
+    services::{anilist, bgg, resource, vndb},
     state::AppState,
 };
 
@@ -37,6 +37,7 @@ async fn main() -> std::io::Result<()> {
                     .service(resource::resource_untrack),
             )
             .service(scope("/vndb").service(vndb::vndb_search))
+            .service(scope("/anilist").service(anilist::anilist_search))
     })
     .bind(("0.0.0.0", 8080))?
     .run()
