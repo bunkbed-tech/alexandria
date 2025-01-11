@@ -44,6 +44,7 @@ You can preview the production build with `npm run preview`.
 3. [ ] Add more APIs
 4. [ ] Package standalone release with database
 5. [ ] Make combobox options dynamic
+6. [ ] Fix BGG queries to only fetch the page of results when selected
 
 ## v2 Todos
 
@@ -78,11 +79,13 @@ You can preview the production build with `npm run preview`.
 
 ## APIs
 
-1. [ ] twitch/amazon api for video games
-2. [ ] google books api
-3. [ ] discogs
-4. [ ] myanimelist
-5. [ ] vndb
+1. [x] BoardGameGeek
+2. [x] Visual Novel DataBase
+3. [ ] twitch/amazon api for video games
+4. [ ] google books api
+5. [ ] Discogs
+6. [ ] MyAnimeList/AniList
+7. [ ] MyDramaList
 
 ## Future reading
 

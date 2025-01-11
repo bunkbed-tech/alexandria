@@ -15,6 +15,8 @@ async fn search_vndb(query: String) -> Result<Vec<Resource>, String> {
         .json(&RequestData {
             filters: vec![String::from("search"), String::from("="), query],
             fields: String::from("title, description, released, image.thumbnail"),
+            count: true,
+            results: 100,
         })
         .send()
         .await
@@ -68,12 +70,15 @@ struct SearchResult {
 struct SearchResults {
     results: Vec<SearchResult>,
     more: bool,
+    count: i32,
 }
 
 #[derive(Serialize)]
 struct RequestData {
     filters: Vec<String>,
     fields: String,
+    count: bool,
+    results: i32,
 }
 
 #[cfg(test)]
