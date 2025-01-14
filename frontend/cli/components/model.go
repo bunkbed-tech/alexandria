@@ -46,7 +46,7 @@ func NewModel() model {
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(m.login.Init(), m.left.Init(), m.right.Init())
+	return m.login.Init()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -88,6 +88,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "enter":
 				if m.login.EvaluateLogin() {
+					cmds = append(cmds, tea.Batch(m.left.Init(), m.right.Init()))
 					m.state = leftView
 				}
 			}
