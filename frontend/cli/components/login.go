@@ -56,7 +56,9 @@ func (m login) Update(msg tea.Msg) (login, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "up", "down":
+		case "esc", "ctrl+c":
+			return m, tea.Quit
+		case "up", "down", "tab":
 			s := msg.String()
 
 			// Cycle indexes
