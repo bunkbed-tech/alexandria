@@ -10,6 +10,9 @@ pub async fn anilist_search(Query(params): Query<QueryParams>) -> impl Responder
     respond(search_anilist(params.search, params.media_format).await)
 }
 
+// TODO collect seasons under umbrella series
+// NOTE [MediaRelation](https://docs.anilist.co/reference/enum/mediarelation)
+
 async fn search_anilist(
     search: String,
     media_format: MediaFormat,

@@ -2,3 +2,4 @@
 *.swp
 /.pre-commit-config.yaml
 /.direnv/
+result

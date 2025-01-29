@@ -1,99 +1,55 @@
-# create-svelte
+# Alexandria
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+## Features
 
-## Creating a project
+1. [ ] Search for resources across all public databases of multimedia
+2. [ ] Add any resource to default tracking library
+3. [ ] Create arbitrary lists of resources
+4. [ ] Add resources from default library to any list
+5. [ ] Integrate with Fediverse via ActivityPub
+6. [ ] Follow and view friends' libraries, and view recent highlights in timeline view
+7. [ ] Write reviews and leave emoji reactions on friends' reviews
+8. [ ] Manually add and track resources missing from external databases
+9. [ ] Time, instance, and character/word tracking in the default library
+10. [ ] Rust API + Go TUI + Svelte web + Tauri desktop + Tauri mobile
+11. [ ] Self-hosting guides
+12. [ ] Hosted demo on private cloud
+13. [ ] Initial instance on private cloud
+14. [ ] DevOps
+15. [ ] Data export to JSON
+16. [ ] Detailed view for specific resource (user review, api rating, friends' reviews, alexandria average rating, etc)
 
-If you're seeing this, you've probably already done this step. Congrats!
+### Resource Sources
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+1. [x] BoardGameGeek (Board Games)
+2. [x] VNDB (Visual Novels)
+3. [ ] IGDB (Video Games)
+4. [ ] OpenLibrary (Books)
+5. [ ] Discogs (Music)
+6. [-] Anilist (Anime + Manga + Light Novel)
+7. [ ] MyDramaList (Asian Movies + TV Shows)
+8. [ ] TMDB (Movies & TV Shows)
+9. [ ] Audible (Audiobooks)
+10. [ ] ListenNotes (Podcasts)
+11. [ ] Comic Vine (Comic Books)
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
-
-## Todo
+## Frontend TODOs
 
 1. [ ] Retain state in app between navigation
 2. [ ] Fix up list creation buttons
-3. [ ] Add more APIs
-4. [ ] Package standalone release with database
-5. [ ] Make combobox options dynamic
-6. [ ] Fix BGG queries to only fetch the page of results when selected
-
-## v2 Todos
-
-1. [ ] Server-client architecture
-2. [ ] Self-hosted templates or packages (k8s, docker, etc., NIX)
-3. [ ] Mobile app
-4. [ ] data export
-
-## Frontend Styling
-
-1. [x] minimum window size
-2. [x] white text for everything with orange background
-3. [x] padding between pagination and title and grid
-4. [x] dynamic header
-5. [x] labels for filters
-6. [x] increments for slider and labels for knobs
-7. [ ] filter knobs should be fine tuned to allow for arbitrary filtering between years instead of binary
-8. [x] same highlight on hover mechanism for resource card buttons and pagination
-9. [ ] thin dividers on the sides of pagination
-10. [ ] FIX THE GRID
-11. [ ] carousel view
-12. [ ] items per page setting
-13. [ ] elongate placeholder thumbnail to full size
-14. [ ] fix infinite scroll of titles
-15. [ ] blow up and gray out thumbnail as new background
-16. [ ] bug where wrong items in tracked are removed
-17. [ ] logos
-18. [ ] function loading placeholder (spinner, progress bar)
-19. [ ] undo toast
-20. [ ] untrack confirmation dialog
-21. [ ] get slider to work again
-
-## APIs
-
-1. [x] BoardGameGeek
-2. [x] Visual Novel DataBase
-3. [ ] twitch/amazon api for video games
-4. [ ] google books api
-5. [ ] Discogs
-6. [ ] MyAnimeList
-7. [ ] MyDramaList
-8. [-] Anilist
-
-- [MediaRelation](https://docs.anilist.co/reference/enum/mediarelation) will allow us to associate seasons together under the same umbrella series
-
-## Future reading
-
-1. overlay/modal components in bubbletea are a little complicated with a few different fragile solutions:
-
-- [bubblezone](https://github.com/lrstanley/bubblezone)
-- [lipgloss overlay](https://gist.github.com/ras0q/9bf5d81544b22302393f61206892e2cd)
-- [another lipgloss overlay](https://gist.github.com/Broderick-Westrope/b89b14770c09dda928c4a108f437b927)
+3. [ ] Fix BGG queries to only fetch the page of results when selected
+4. [ ] Make combobox options dynamic
+5. [ ] filter knobs should be fine tuned to allow for arbitrary filtering between years instead of binary
+6. [ ] thin dividers on the sides of pagination
+7. [ ] FIX THE GRID
+8. [ ] carousel view
+9. [ ] items per page setting
+10. [ ] elongate placeholder thumbnail to full size
+11. [ ] fix infinite scroll of titles
+12. [ ] blow up and gray out thumbnail as new background
+13. [ ] bug where wrong items in tracked are removed
+14. [ ] logos
+15. [ ] function loading placeholder (spinner, progress bar)
+16. [ ] undo toast
+17. [ ] untrack confirmation dialog
+18. [ ] get slider to work again
