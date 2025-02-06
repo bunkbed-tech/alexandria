@@ -32,12 +32,12 @@ func NewLogin() login {
 
 		switch i {
 		case 0:
-			t.Placeholder = "Username (type user)"
+			t.Placeholder = "Username (demo)"
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		case 1:
-			t.Placeholder = "Password (type pass)"
+			t.Placeholder = "Password (test)"
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
 		}
@@ -56,7 +56,9 @@ func (m login) Update(msg tea.Msg) (login, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "up", "down":
+		case "esc", "ctrl+c":
+			return m, tea.Quit
+		case "up", "down", "tab":
 			s := msg.String()
 
 			// Cycle indexes
@@ -112,7 +114,7 @@ func (m *login) updateInputs(msg tea.Msg) tea.Cmd {
 func (m *login) EvaluateLogin() bool {
 	var username = m.inputs[0].Value()
 	var password = m.inputs[1].Value()
-	if username == "user" && password == "pass" {
+	if username == "demo" && password == "test" {
 		return true
 	} else {
 		return false
@@ -121,13 +123,10 @@ func (m *login) EvaluateLogin() bool {
 
 func (m login) View() string {
 	var b strings.Builder
-	b.WriteString("Welcome to Alexandria!\n\n")
 
 	for i := range m.inputs {
 		b.WriteString(m.inputs[i].View())
-		if i < len(m.inputs)-1 {
-			b.WriteRune('\n')
-		}
+		b.WriteRune('\n')
 	}
 
 	return b.String()

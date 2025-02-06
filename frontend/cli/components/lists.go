@@ -28,6 +28,8 @@ func (m lists) Update(msg tea.Msg) (lists, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
 		case "up", "k":
 			if m.cursor > 0 {
 				m.cursor--
