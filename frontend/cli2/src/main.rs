@@ -4,6 +4,7 @@ use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
+    text::Text,
     widgets::Widget,
     DefaultTerminal, Frame,
 };
@@ -59,6 +60,10 @@ impl App {
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        self.login.render(area, buf);
+        if self.login.is_authenticated() {
+            Text::from("Success!").render(area, buf);
+        } else {
+            self.login.render(area, buf);
+        }
     }
 }

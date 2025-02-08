@@ -4,22 +4,29 @@ use crossterm::event::Event;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Modifier, Style, Stylize},
+    style::{Color, Modifier, Style, Stylize},
     symbols::border,
     text::Text,
     widgets::{Block, Widget},
 };
-use tui_textarea::{Input, Key, TextArea};
+use tui_textarea::{CursorMove, Input, Key, TextArea};
 
 use crate::utils::center_widget;
 
 
-fn inactivate(textarea: &mut TextArea<'_>) {
+fn inactivate(textarea: &mut TextArea) {
     textarea.set_cursor_style(Style::default());
 }
 
-fn activate(textarea: &mut TextArea<'_>) {
+fn activate(textarea: &mut TextArea) {
     textarea.set_cursor_style(Style::default().add_modifier(Modifier::REVERSED));
+}
+
+fn clear(textarea: &mut TextArea) {
+    textarea.move_cursor(CursorMove::End);
+    while !textarea.is_empty() {
+        textarea.delete_line_by_head();
+    }
 }
 
 enum ActiveInput {
@@ -27,9 +34,17 @@ enum ActiveInput {
     Password,
 }
 
+#[derive(PartialEq)]
+enum AuthState {
+    Default,
+    Failed,
+    Success,
+}
+
 pub struct Login {
     username: TextArea<'static>,
     password: TextArea<'static>,
+    auth_state: AuthState,
     active_input: ActiveInput,
 }
 
@@ -47,13 +62,32 @@ impl Login {
         Login {
             username,
             password,
+            auth_state: AuthState::Default,
             active_input: ActiveInput::Username,
+        }
+    }
+
+    pub fn is_authenticated(&self) -> bool {
+        self.auth_state == AuthState::Success
+    }
+
+    fn login(&mut self) {
+        let success = self.username.lines()[0] == "test" && self.password.lines()[0] == "test";
+        if !success {
+            clear(&mut self.username);
+            clear(&mut self.password);
+            activate(&mut self.username);
+            inactivate(&mut self.password);
+            self.auth_state = AuthState::Failed;
+            self.active_input = ActiveInput::Username;
+        } else {
+            self.auth_state = AuthState::Success;
         }
     }
 
     pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
         match event.into() {
-            Input { key: Key::Tab, ..} => match self.active_input {
+            Input { key: Key::Tab, .. } => match self.active_input {
                 ActiveInput::Username => {
                     inactivate(&mut self.username);
                     activate(&mut self.password);
@@ -65,6 +99,7 @@ impl Login {
                     self.active_input = ActiveInput::Username;
                 },
             },
+            Input { key: Key::Enter, .. } => self.login(),
             input => {
                 let active_input = match self.active_input {
                     ActiveInput::Username => &mut self.username,
@@ -110,7 +145,15 @@ impl Widget for &Login {
         let username_rect = input_layout.split(lines[1]);
         let password_rect = input_layout.split(lines[2]);
 
-        Block::bordered().border_set(border::THICK).render(centered_rect, buf);
+        let block_color = match self.auth_state {
+            AuthState::Default => Color::Gray,
+            AuthState::Failed => Color::Red,
+            AuthState::Success => Color::Green,
+        };
+        Block::bordered()
+            .border_set(border::THICK)
+            .border_style(Style::default().fg(block_color))
+            .render(centered_rect, buf);
 
         Text::from("Alexandria".bold()).render(lines[0], buf);
         Text::from("Username".bold()).render(username_rect[0], buf);
