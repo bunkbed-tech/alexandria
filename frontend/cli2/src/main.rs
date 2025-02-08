@@ -4,7 +4,6 @@ use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
-    text::Text,
     widgets::Widget,
     DefaultTerminal, Frame,
 };
@@ -12,7 +11,10 @@ use ratatui::{
 mod components;
 mod utils;
 
-use crate::components::login::Login;
+use crate::components::{
+    home::Home,
+    login::Login,
+};
 
 
 fn main() -> io::Result<()> {
@@ -24,6 +26,7 @@ fn main() -> io::Result<()> {
 
 struct App {
     login: Login,
+    home: Home,
     exit: bool,
 }
 
@@ -31,6 +34,7 @@ impl App {
     pub fn new() -> App {
         App {
             login: Login::new(),
+            home: Home::new(),
             exit: false,
         }
     }
@@ -51,7 +55,11 @@ impl App {
         match event::read()?.into() {
             Event::Key(key) if key.kind == KeyEventKind::Press && key.code == KeyCode::Esc => self.exit = true,
             input_event => {
-                self.login.handle_event(input_event)?;
+                if self.login.is_authenticated() {
+                    self.home.handle_event(input_event)?;
+                } else {
+                    self.login.handle_event(input_event)?;
+                }
             },
         };
         Ok(())
@@ -61,7 +69,7 @@ impl App {
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         if self.login.is_authenticated() {
-            Text::from("Success!").render(area, buf);
+            self.home.render(area, buf);
         } else {
             self.login.render(area, buf);
         }
