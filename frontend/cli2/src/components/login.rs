@@ -11,7 +11,7 @@ use ratatui::{
 };
 use tui_textarea::{CursorMove, Input, Key, TextArea};
 
-use crate::utils::center_widget;
+use crate::utils::{area_minus_border, center_widget};
 
 
 fn inactivate(textarea: &mut TextArea) {
@@ -119,12 +119,7 @@ impl Widget for &Login {
             Constraint::Length(50),
             Constraint::Length(5),
         );
-        let unbordered_rect = Rect {
-            x: centered_rect.x + 1,
-            y: centered_rect.y + 1,
-            width: centered_rect.width - 2,
-            height: centered_rect.height - 2,
-        };
+        let unbordered_rect = area_minus_border(centered_rect);
         // Split it into three lines
         let lines = Layout::default()
             .direction(Direction::Vertical)
