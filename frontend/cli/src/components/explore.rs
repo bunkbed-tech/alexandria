@@ -4,28 +4,50 @@ use crossterm::event::Event;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
+    style::{Color, Style},
     widgets::{Block, Widget},
 };
 use tui_textarea::{Input, Key, TextArea};
 
 use crate::utils::area_minus_border;
 
+const GRID_ROWS: usize = 3;
+
+enum State {
+    Searching,
+    Navigating,
+}
+
 pub struct Explore {
     search: TextArea<'static>,
+    state: State,
+    focused: Option<(usize, usize)>,
 }
 
 impl Explore {
     pub fn new() -> Self {
         Self {
             search: TextArea::default(),
+            state: State::Searching,
+            focused: Some((0, 0)),
         }
     }
 
     pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
-        match event.into() {
-            Input { key: Key::Char('q'), .. } => {},  // FIXME handle input types better
-            input => {
-                self.search.input(input);
+        match self.state {
+            State::Searching => match event.into() {
+                Input { key: Key::Esc, .. } => self.state = State::Navigating,
+                input => { self.search.input(input); },
+            },
+            State::Navigating => match event.into() {
+                Input { key: Key::Char('/'), .. } => self.state = State::Searching,
+                input => self.focused = self.focused.map(|position| match input {
+                    Input { key: Key::Char('h'), .. } => (position.0.saturating_sub(1), position.1),
+                    Input { key: Key::Char('j'), .. } => (position.0, (GRID_ROWS - 1).min(position.1 + 1)),
+                    Input { key: Key::Char('k'), .. } => (position.0, position.1.saturating_sub(1)),
+                    Input { key: Key::Char('l'), .. } => ((GRID_ROWS - 1).min(position.0 + 1), position.1),
+                    _ => position,
+                }),
             },
         };
         Ok(())
@@ -39,7 +61,7 @@ impl Widget for &Explore {
         self.search.render(area_minus_border(header_area), buf);
         Block::bordered().title("Search").render(header_area, buf);
 
-        let grid_layout = Layout::vertical([Constraint::Min(1); 3])
+        let grid_layout = Layout::vertical([Constraint::Min(1); GRID_ROWS])
             .split(area_minus_border(content_area))
             .iter()
             .map(|&area| {
@@ -48,9 +70,10 @@ impl Widget for &Explore {
                     .to_vec()
             })
             .collect::<Vec<_>>();
-        for row in grid_layout.iter() {
-            for cell in row.iter() {
-                Block::bordered().render(*cell, buf);
+        for (y, row) in grid_layout.iter().enumerate() {
+            for (x, cell) in row.iter().enumerate() {
+                let color = if self.focused == Some((x, y)) { Color::Green } else { Color::Gray };
+                Block::bordered().border_style(Style::default().fg(color)).render(*cell, buf);
             }
         }
     }
