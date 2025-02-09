@@ -1,5 +1,5 @@
 [workspace]
-members = ["models", "backend", "frontend/cli2", "frontend/desktop"]
+members = ["models", "backend", "frontend/cli", "frontend/desktop"]
 resolver = "2"
 
 [workspace.package]
