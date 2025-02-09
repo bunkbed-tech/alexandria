@@ -5,7 +5,9 @@ use chrono::{Datelike, TimeZone, Utc};
 use reqwest::Client;
 use serde::Deserialize;
 
-use crate::{http::respond, models::Resource};
+use models::Resource;
+
+use crate::http::respond;
 
 #[get("/search")]
 pub async fn igdb_search(Query(params): Query<QueryParams>) -> impl Responder {

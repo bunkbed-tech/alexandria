@@ -6,7 +6,12 @@ use actix_web::{
 };
 use sqlx::postgres::PgPoolOptions;
 
-use alexandria::{
+use models::Resource;
+
+mod http;
+mod services;
+mod state;
+use crate::{
     services::{anilist, bgg, igdb, resource, vndb},
     state::AppState,
 };

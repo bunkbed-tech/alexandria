@@ -6,7 +6,9 @@ use quick_xml::de::from_str;
 use reqwest::get as rget;
 use serde::{Deserialize, Deserializer, Serialize};
 
-use crate::{http::respond, models::Resource};
+use models::Resource;
+
+use crate::http::respond;
 
 #[get("/search")]
 pub async fn bgg_search(Query(params): Query<QueryParams>) -> impl Responder {

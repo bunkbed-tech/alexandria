@@ -3,7 +3,9 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use crate::{http::respond, models::Resource};
+use models::Resource;
+
+use crate::http::respond;
 
 #[get("/search")]
 pub async fn anilist_search(Query(params): Query<QueryParams>) -> impl Responder {

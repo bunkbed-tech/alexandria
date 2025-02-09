@@ -32,7 +32,7 @@ services:
       DATABASE_URL: postgresql://$POSTGRES_USER:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/$POSTGRES_DB
       ALEXANDRIA_IGDB_CLIENT_ID: ${ALEXANDRIA_IGDB_CLIENT_ID}
       ALEXANDRIA_IGDB_CLIENT_SECRET: ${ALEXANDRIA_IGDB_CLIENT_SECRET}
-    working_dir: /app
+    working_dir: /app/backend
     command: [ cargo, run ]
     depends_on:
       migrate:
@@ -40,7 +40,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./backend:/app
+      - ./:/app
   # frontend:
   # cli:
   # desktop:

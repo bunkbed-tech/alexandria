@@ -2,7 +2,9 @@ use actix_web::{get, web::Query, Responder};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-use crate::{http::respond, models::Resource};
+use models::Resource;
+
+use crate::http::respond;
 
 #[get("/search")]
 pub async fn vndb_search(Query(params): Query<QueryParams>) -> impl Responder {

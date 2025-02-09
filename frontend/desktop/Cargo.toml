@@ -1,9 +1,9 @@
 [package]
-name = "alexandria-tauri"
-version = "0.0.1"
-authors = ["Tristan Schrader", "Tahoe Schrader"]
-description = "Track your media"
-edition = "2021"
+name = "desktop"
+
+authors.workspace = true
+edition.workspace = true
+version.workspace = true
 
 [build-dependencies]
 tauri-build = { version = "2.0.0-rc.0", features = [] }

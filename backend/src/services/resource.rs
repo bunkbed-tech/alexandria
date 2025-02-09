@@ -8,7 +8,9 @@ use actix_web::{
 use serde::{Deserialize, Deserializer};
 use sqlx::postgres::PgPool;
 
-use crate::{http::respond, models::Resource, state::AppState};
+use models::Resource;
+
+use crate::{http::respond, state::AppState};
 
 #[get("/")]
 pub async fn resource_list(
