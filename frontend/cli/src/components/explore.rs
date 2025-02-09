@@ -4,7 +4,6 @@ use crossterm::event::Event;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    style::{Color, Style},
     widgets::{Block, Widget},
 };
 use tui_textarea::{Input, Key, TextArea};
@@ -12,14 +11,12 @@ use tui_textarea::{Input, Key, TextArea};
 use crate::utils::area_minus_border;
 
 pub struct Explore {
-    pub is_active: bool,
     search: TextArea<'static>,
 }
 
 impl Explore {
-    pub fn new(is_active: bool) -> Self {
+    pub fn new() -> Self {
         Self {
-            is_active,
             search: TextArea::default(),
         }
     }
@@ -37,11 +34,7 @@ impl Explore {
 
 impl Widget for &Explore {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let color = if self.is_active { Color::Blue } else { Color::Gray };
-        let block = Block::bordered().border_style(Style::default().fg(color));
-        block.render(area, buf);
-
-        let [header_area, content_area] = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]).areas(area_minus_border(area));
+        let [header_area, content_area] = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]).areas(area);
 
         self.search.render(area_minus_border(header_area), buf);
         Block::bordered().title("Search").render(header_area, buf);

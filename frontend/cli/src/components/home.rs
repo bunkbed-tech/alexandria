@@ -3,13 +3,17 @@ use std::io;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
+    style::{Color, Style},
     layout::{Constraint, Layout, Rect},
-    widgets::Widget,
+    widgets::{Block, Widget},
 };
 
-use crate::components::{
-    explore::Explore,
-    sidebar::Sidebar,
+use crate::{
+    components::{
+        explore::Explore,
+        sidebar::Sidebar,
+    },
+    utils::area_minus_border,
 };
 
 #[derive(PartialEq)]
@@ -28,8 +32,8 @@ impl Home {
     pub fn new() -> Self {
         Self {
             active_pane: ActivePane::Explore,
-            explore: Explore::new(true),
-            sidebar: Sidebar::new(false),
+            explore: Explore::new(),
+            sidebar: Sidebar::new(),
         }
     }
 
@@ -40,8 +44,6 @@ impl Home {
                     ActivePane::Sidebar => ActivePane::Explore,
                     ActivePane::Explore => ActivePane::Sidebar,
                 };
-                self.sidebar.is_active = self.active_pane == ActivePane::Sidebar;
-                self.explore.is_active = self.active_pane == ActivePane::Explore;
             },
             input => match self.active_pane {
                 ActivePane::Sidebar => self.sidebar.handle_event(input)?,
@@ -54,8 +56,16 @@ impl Home {
 
 impl Widget for &Home {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let [sidebar_area, main_area] = Layout::horizontal([Constraint::Percentage(20), Constraint::Percentage(80)]).areas(area);
-        self.sidebar.render(sidebar_area, buf);
-        self.explore.render(main_area, buf);
+        let [sidebar_area, explore_area] = Layout::horizontal([Constraint::Percentage(20), Constraint::Percentage(80)]).areas(area);
+
+        let sidebar_color = if self.active_pane == ActivePane::Sidebar { Color::Blue } else { Color::Gray };
+        let sidebar_block = Block::bordered().border_style(Style::default().fg(sidebar_color));
+        sidebar_block.render(sidebar_area, buf);
+        self.sidebar.render(area_minus_border(sidebar_area), buf);
+
+        let explore_color = if self.active_pane == ActivePane::Explore { Color::Blue } else { Color::Gray };
+        let explore_block = Block::bordered().border_style(Style::default().fg(explore_color));
+        explore_block.render(explore_area, buf);
+        self.explore.render(area_minus_border(explore_area), buf);
     }
 }
