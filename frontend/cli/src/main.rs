@@ -1,6 +1,6 @@
 use std::io;
 
-use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyModifiers};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -52,8 +52,12 @@ impl App {
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
-        match event::read()?.into() {
-            Event::Key(key) if key.kind == KeyEventKind::Press && key.code == KeyCode::Esc => self.exit = true,
+        match event::read()? {
+            Event::Key(key) if (
+                key.kind == KeyEventKind::Press
+                && key.code == KeyCode::Char('c')
+                && key.modifiers.contains(KeyModifiers::CONTROL)
+            ) => self.exit = true,
             input_event => {
                 if self.login.is_authenticated() {
                     self.home.handle_event(input_event)?;
