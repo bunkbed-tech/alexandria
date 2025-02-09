@@ -1,45 +1,51 @@
 use std::io;
 
-use crossterm::event::Event;
+use crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    style::{Color, Style},
-    widgets::{Block, List, Widget},
+    widgets::Widget,
 };
-use tui_textarea::{Input, Key, TextArea};
 
-use crate::utils::area_minus_border;
+use crate::components::{
+    explore::Explore,
+    sidebar::Sidebar,
+};
 
+#[derive(PartialEq)]
 enum ActivePane {
     Sidebar,
-    Content,
+    Explore,
 }
 
 pub struct Home {
     active_pane: ActivePane,
-    search: TextArea<'static>,
+    explore: Explore,
+    sidebar: Sidebar,
 }
 
 impl Home {
-    pub fn new() -> Home {
-        Home {
-            active_pane: ActivePane::Sidebar,
-            search: TextArea::default(),
+    pub fn new() -> Self {
+        Self {
+            active_pane: ActivePane::Explore,
+            explore: Explore::new(true),
+            sidebar: Sidebar::new(false),
         }
     }
 
     pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
-        match event.into() {
-            Input { key: Key::Tab, .. } => match self.active_pane {
-                ActivePane::Sidebar => self.active_pane = ActivePane::Content,
-                ActivePane::Content => self.active_pane = ActivePane::Sidebar,
+        match event {
+            Event::Key(key) if key.kind == KeyEventKind::Press && key.code == KeyCode::Tab => {
+                self.active_pane = match self.active_pane {
+                    ActivePane::Sidebar => ActivePane::Explore,
+                    ActivePane::Explore => ActivePane::Sidebar,
+                };
+                self.sidebar.is_active = self.active_pane == ActivePane::Sidebar;
+                self.explore.is_active = self.active_pane == ActivePane::Explore;
             },
             input => match self.active_pane {
-                ActivePane::Sidebar => {},
-                ActivePane::Content => {
-                    self.search.input(input);
-                },
+                ActivePane::Sidebar => self.sidebar.handle_event(input)?,
+                ActivePane::Explore => self.explore.handle_event(input)?,
             },
         };
         Ok(())
@@ -49,37 +55,7 @@ impl Home {
 impl Widget for &Home {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let [sidebar_area, main_area] = Layout::horizontal([Constraint::Percentage(20), Constraint::Percentage(80)]).areas(area);
-
-        let sidebar_block = match self.active_pane {
-            ActivePane::Sidebar => Block::bordered().border_style(Style::default().fg(Color::Blue)),
-            ActivePane::Content => Block::bordered(),
-        };
-        List::new(["Explore", "Library"]).block(sidebar_block).render(sidebar_area, buf);
-
-        let main_block = match self.active_pane {
-            ActivePane::Sidebar => Block::bordered(),
-            ActivePane::Content => Block::bordered().border_style(Style::default().fg(Color::Blue)),
-        };
-        main_block.render(main_area, buf);
-
-        let [header_area, content_area] = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]).areas(area_minus_border(main_area));
-
-        self.search.render(area_minus_border(header_area), buf);
-        Block::bordered().title("Search").render(header_area, buf);
-
-        let grid_layout = Layout::vertical([Constraint::Min(1); 3])
-            .split(area_minus_border(content_area))
-            .iter()
-            .map(|&area| {
-                Layout::horizontal([Constraint::Min(1); 3])
-                    .split(area)
-                    .to_vec()
-            })
-            .collect::<Vec<_>>();
-        for row in grid_layout.iter() {
-            for cell in row.iter() {
-                Block::bordered().render(*cell, buf);
-            }
-        }
+        self.sidebar.render(sidebar_area, buf);
+        self.explore.render(main_area, buf);
     }
 }
