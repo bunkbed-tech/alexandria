@@ -18,7 +18,7 @@ pub enum Page {
 }
 
 pub struct Sidebar {
-    page: Page,
+    pub page: Page,
     index: isize,
 }
 
