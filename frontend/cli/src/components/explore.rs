@@ -4,7 +4,7 @@ use crossterm::event::Event;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    style::{Color, Style},
+    style::{Color, Modifier, Style},
     widgets::{Block, Widget},
 };
 use tui_textarea::{Input, Key, TextArea};
@@ -24,11 +24,23 @@ pub struct Explore {
     focused: Option<(usize, usize)>,
 }
 
+fn render_search_state(search: &mut TextArea, state: &State) {
+    let cursor_modifier = match state {
+        State::Searching => Modifier::REVERSED,
+        State::Navigating => Modifier::HIDDEN,
+    };
+    search.set_cursor_style(Style::default().add_modifier(cursor_modifier));
+}
+
 impl Explore {
     pub fn new() -> Self {
+        let mut search = TextArea::default();
+        let state = State::Searching;
+        render_search_state(&mut search, &state);
+
         Self {
-            search: TextArea::default(),
-            state: State::Searching,
+            search,
+            state,
             focused: Some((0, 0)),
         }
     }
@@ -50,6 +62,7 @@ impl Explore {
                 }),
             },
         };
+        render_search_state(&mut self.search, &self.state);
         Ok(())
     }
 }
