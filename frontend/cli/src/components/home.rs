@@ -3,8 +3,8 @@ use std::io;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
-    style::{Color, Style},
     layout::{Constraint, Layout, Rect},
+    style::{Color, Style},
     widgets::{Block, Widget},
 };
 
@@ -70,7 +70,7 @@ impl Widget for &Home {
         self.sidebar.render(area_minus_border(sidebar_area), buf);
 
         let page_color = if self.active_pane == ActivePane::Page { Color::Blue } else { Color::Gray };
-        let page_block = Block::bordered().border_style(Style::default().fg(page_color));
+        let page_block = Block::bordered().border_style(Style::default().fg(page_color)).title(self.sidebar.page.to_string());
         page_block.render(page_area, buf);
         let page_area_inner = area_minus_border(page_area);
         match self.sidebar.page {
