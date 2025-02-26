@@ -33,7 +33,7 @@ pub async fn resource_untrack(data: Data<AppState>, path: Path<i32>) -> impl Res
     respond(untrack_resource(&data.db, path.into_inner()).await)
 }
 
-async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<Resource>, String> {
+pub async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<Resource>, String> {
     let rows: Vec<Resource>;
     if let Some(api_ids) = ids {
         rows = sqlx::query_as!(

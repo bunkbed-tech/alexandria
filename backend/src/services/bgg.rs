@@ -78,7 +78,7 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
     Ok(resources)
 }
 
-async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
+pub async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
     match search_bgg(query).await {
         Ok(resource_ids) => {
             // BGG /thing API has a limit of 20 IDs, so we chunk the IDs
