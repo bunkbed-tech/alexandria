@@ -12,10 +12,12 @@ pub async fn anilist_search(Query(params): Query<QueryParams>) -> impl Responder
     respond(search_anilist(params.search, params.media_format).await)
 }
 
+// FIXME MANGA + NOVEL do not parse correctly into SearchResults
+// TODO allow specifying multiple media formats at once if possible
 // TODO collect seasons under umbrella series
 // NOTE [MediaRelation](https://docs.anilist.co/reference/enum/mediarelation)
 
-async fn search_anilist(
+pub async fn search_anilist(
     search: String,
     media_format: MediaFormat,
 ) -> Result<Vec<Resource>, String> {
@@ -78,7 +80,7 @@ enum MediaType {
 }
 
 #[derive(Deserialize, Serialize)]
-enum MediaFormat {
+pub enum MediaFormat {
     TV,
     MOVIE,
     MANGA,

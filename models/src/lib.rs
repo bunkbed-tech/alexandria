@@ -2,6 +2,8 @@ use std::fmt::{Display, Formatter, Result};
 
 use serde::{Deserialize, Serialize};
 
+// FIXME define models for different APIs to avoid api_id duplication
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Resource {
     pub id: Option<i32>,

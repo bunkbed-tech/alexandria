@@ -11,7 +11,7 @@ pub async fn vndb_search(Query(params): Query<QueryParams>) -> impl Responder {
     respond(search_vndb(params.query).await)
 }
 
-async fn search_vndb(query: String) -> Result<Vec<Resource>, String> {
+pub async fn search_vndb(query: String) -> Result<Vec<Resource>, String> {
     Client::new()
         .post("https://api.vndb.org/kana/vn")
         .json(&RequestData {

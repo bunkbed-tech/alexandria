@@ -14,7 +14,7 @@ pub async fn igdb_search(Query(params): Query<QueryParams>) -> impl Responder {
     respond(search_igdb(params.query).await)
 }
 
-async fn search_igdb(query: String) -> Result<Vec<Resource>, String> {
+pub async fn search_igdb(query: String) -> Result<Vec<Resource>, String> {
     let client_id =
         var("ALEXANDRIA_IGDB_CLIENT_ID").expect("ALEXANDRIA_IGDB_CLIENT_ID must be set");
     let client_id_str = client_id.as_str();
