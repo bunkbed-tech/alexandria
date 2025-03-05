@@ -33,12 +33,13 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<Resource>, Vec<String>) {
         .iter()
         .map(|resource| resource.api_id)
         .collect::<Vec<_>>();
-    let (db_resources, db_error) = match list_resources(pool, Some(ids)).await {
-        Ok(_resources) => (_resources, String::new()),
-        Err(message) => (Vec::<Resource>::new(), message),
+    let db_resources = match list_resources(pool, Some(ids)).await {
+        Ok(_resources) => _resources,
+        Err(db_error) => {
+            errors.push(db_error);
+            Vec::<Resource>::new()
+        },
     };
-    let mut db_errors = vec![db_error];
-    errors.append(&mut db_errors);
 
     let api_to_db_id: HashMap<i32, i32> = db_resources
         .into_iter()
