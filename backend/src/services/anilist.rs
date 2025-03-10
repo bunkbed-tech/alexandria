@@ -1,7 +1,9 @@
+use std::collections::HashSet;
+
 use actix_web::{get, web::Query, Responder};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, to_value};
 
 use models::Resource;
 
@@ -12,19 +14,32 @@ pub async fn anilist_search(Query(params): Query<QueryParams>) -> impl Responder
     respond(search_anilist(params.search, params.media_format).await)
 }
 
-// TODO allow specifying multiple media formats at once if possible
 // TODO collect seasons under umbrella series
 // NOTE [MediaRelation](https://docs.anilist.co/reference/enum/mediarelation)
 
-pub async fn search_anilist(
+pub async fn search_anilist<Format>(
     search: String,
-    media_format: MediaFormat,
-) -> Result<Vec<Resource>, String> {
-    let media_type = match media_format {
-        MediaFormat::TV | MediaFormat::MOVIE => MediaType::ANIME,
-        MediaFormat::MANGA | MediaFormat::NOVEL => MediaType::MANGA,
-    };
-    let json = json!({"query": QUERY, "variables": {"search": search, "type": media_type, "format": media_format}});
+    media_format: Format,
+) -> Result<Vec<Resource>, String>
+where
+    Format: Into<Vec<MediaFormat>>,
+{
+    let media_formats: Vec<MediaFormat> = media_format.into();
+    let media_types_unique = media_formats
+        .iter()
+        .map(|format| match format {
+            MediaFormat::TV | MediaFormat::MOVIE => MediaType::ANIME,
+            MediaFormat::MANGA | MediaFormat::NOVEL => MediaType::MANGA,
+        })
+        .collect::<HashSet<_>>();
+    let media_types = media_types_unique.iter().collect::<Vec<_>>();
+
+    let mut variables = json!({"search": search, "formats": media_formats});
+    if media_types.len() == 1 {
+        variables["type"] = to_value(**media_types.first().unwrap()).unwrap();
+    }
+    let json = json!({"query": QUERY, "variables": variables});
+
     Client::new()
         .post("https://graphql.anilist.co")
         .header("Content-Type", "application/json")
@@ -55,9 +70,9 @@ pub async fn search_anilist(
 }
 
 const QUERY: &str = "
-query ($search: String!, $type: MediaType!, $format: MediaFormat!) {
+query ($search: String!, $type: MediaType, $formats: [MediaFormat!]!) {
   Page {
-    media (search: $search, type: $type, format: $format) {
+    media (search: $search, type: $type, format_in: $formats) {
       id
       description
       startDate {
@@ -74,7 +89,7 @@ query ($search: String!, $type: MediaType!, $format: MediaFormat!) {
 }
 ";
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Copy, Deserialize, Eq, Hash, PartialEq, Serialize)]
 enum MediaType {
     ANIME,
     MANGA,
@@ -86,6 +101,12 @@ pub enum MediaFormat {
     MOVIE,
     MANGA,
     NOVEL,
+}
+
+impl From<MediaFormat> for Vec<MediaFormat> {
+    fn from(f: MediaFormat) -> Self {
+        vec![f]
+    }
 }
 
 #[derive(Deserialize)]
@@ -198,6 +219,60 @@ mod tests {
             year_published: Some(2014),
             thumbnail: Some(String::from("https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx85215-oHqG7fkrpas9.png")),
         }];
+        assert_eq!(resources, expected_resources);
+    }
+
+    #[test]
+    async fn test_search_anilist_multiple_formats() {
+        let search = String::from("All You Need Is Kill");
+        let resources = search_anilist(search, vec![MediaFormat::MANGA, MediaFormat::NOVEL])
+            .await
+            .unwrap();
+        let expected_resources = vec![
+            Resource {
+                id: None,
+                api_id: 85215,
+                title: String::from("All You Need Is Kill"),
+                description: Some(String::from("When the alien Mimics invade, Keiji Kiriya is just one of many recruits shoved into a suit of battle armor called a Jacket and sent out to kill. Keiji dies on the battlefield, only to be reborn each morning to fight and die again and again. On his 158th iteration, he gets a message from a mysterious ally--the female soldier known as the Full Metal Bitch. Is she the key to Keiji's escape or his final death?\n<br><br>\n(Source: Viz Media)")),
+                year_published: Some(2014),
+                thumbnail: Some(String::from("https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx85215-oHqG7fkrpas9.png")),
+            },
+            Resource {
+              id: None,
+              api_id: 48511,
+              title: String::from("All You Need is Kill"),
+              description: Some(String::from("When the alien Mimics invade, Keiji Kiriya is just one of many recruits shoved into a suit of battle armor called a Jacket and sent out to kill. Keiji dies on the battlefield, only to be reborn each morning to fight and die again and again. On his 158th iteration, he gets a message from a mysterious ally--the female soldier known as the Full Metal Bitch. Is she the key to Keiji's escape or his final death?\n<br><br>\n(Source: Viz Media)")),
+              year_published: Some(2004),
+              thumbnail: Some(String::from("https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx48511-HJpsLXWtjHTz.jpg"))
+            }
+        ];
+        assert_eq!(resources, expected_resources);
+    }
+
+    #[test]
+    async fn test_search_anilist_multiple_types() {
+        let search = String::from("Samurai Champloo");
+        let resources = search_anilist(search, vec![MediaFormat::TV, MediaFormat::MANGA])
+            .await
+            .unwrap();
+        let expected_resources = vec![
+            Resource {
+                id: None,
+                api_id: 205,
+                title: String::from("Samurai Champloo"),
+                description: Some(String::from("Let's break it down. Mugen's a reckless sword-slinger with a style that's more b-boy than Shaolin. He's got a nasty streak that makes people want to stick a knife in his throat. Then there's Jin, a deadbeat ronin who speaks softly but carries a big blade. He runs game old-school style, but he can make your blood spray with the quickness. When these roughnecks bring the ruckus, it ain't good for anybody, especially them. Enter Fuu, the ditzy waitress who springs her new friends from a deadly jam. All she wants in return is help solving a riddle from her past. She and the boys are tracking the scent, but there's 99 ways to die between them and the sunflower samurai.<br>\n<br>\n(Source: Funimation)")),
+                year_published: Some(2004),
+                thumbnail: Some(String::from("https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx205-xxonQKyJtVcw.png")),
+            },
+            Resource {
+              id: None,
+              api_id: 30512,
+              title: String::from("Samurai Champloo"),
+              description: Some(String::from("Mugen is a rough-around-the-edges mercenary with a killer technique and nothing left to lose. Jin is a disciplined samurai who's as deadly as he is reserved. Fuu is a young waitress with a good heart and a resourcefulness that emerges when you least expect it. These three unlikely companions are about to begin a journey that will change all of their lives.<br><br>\nIt's a dangerous quest for a mysterious samurai that will see our squabbling group of heroes get into and out of trouble more times than they can count (which admittedly, isn't very high). From the cynical gentility of the nobles to the backstabbing of the Japanese underworld, Mugen, Jin and Fuu will face threats from without and within as they hurl insults and throwing stars alike. Ancient Japan is about to get a lethal dose of street justice -- Champloo style. And it will never be the same.<br><br>\n(Source: Tokyopop)")),
+              year_published: Some(2004),
+              thumbnail: Some(String::from("https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx30512-L7FWQ9Dj6dHj.png")),
+            }
+        ];
         assert_eq!(resources, expected_resources);
     }
 }

@@ -38,34 +38,25 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<Resource>, Vec<String>) {
     resources.append(&mut bgg_resources);
     errors.append(&mut bgg_errors);
 
-    match search_anilist(query.clone(), MediaFormat::TV).await {
-      Ok(mut anilist_resources) => resources.append(&mut anilist_resources),
-      Err(anilist_error) => errors.push(anilist_error),
-    };
-
-    match search_anilist(query.clone(), MediaFormat::MOVIE).await {
-      Ok(mut anilist_resources) => resources.append(&mut anilist_resources),
-      Err(anilist_error) => errors.push(anilist_error),
-    };
-
-    match search_anilist(query.clone(), MediaFormat::MANGA).await {
-      Ok(mut anilist_resources) => resources.append(&mut anilist_resources),
-      Err(anilist_error) => errors.push(anilist_error),
-    };
-
-    match search_anilist(query.clone(), MediaFormat::NOVEL).await {
-      Ok(mut anilist_resources) => resources.append(&mut anilist_resources),
-      Err(anilist_error) => errors.push(anilist_error),
+    let anilist_formats = vec![
+        MediaFormat::TV,
+        MediaFormat::MOVIE,
+        MediaFormat::MANGA,
+        MediaFormat::NOVEL,
+    ];
+    match search_anilist(query.clone(), anilist_formats).await {
+        Ok(mut anilist_resources) => resources.append(&mut anilist_resources),
+        Err(anilist_error) => errors.push(anilist_error),
     };
 
     match search_vndb(query.clone()).await {
-      Ok(mut vndb_resources) => resources.append(&mut vndb_resources),
-      Err(vndb_error) => errors.push(vndb_error),
+        Ok(mut vndb_resources) => resources.append(&mut vndb_resources),
+        Err(vndb_error) => errors.push(vndb_error),
     };
 
     match search_igdb(query.clone()).await {
-      Ok(mut igdb_resources) => resources.append(&mut igdb_resources),
-      Err(igdb_error) => errors.push(igdb_error),
+        Ok(mut igdb_resources) => resources.append(&mut igdb_resources),
+        Err(igdb_error) => errors.push(igdb_error),
     };
 
     let ids = resources
@@ -77,7 +68,7 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<Resource>, Vec<String>) {
         Err(db_error) => {
             errors.push(db_error);
             Vec::<Resource>::new()
-        },
+        }
     };
 
     let api_to_db_id: HashMap<i32, i32> = db_resources
