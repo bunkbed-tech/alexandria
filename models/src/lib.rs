@@ -27,6 +27,12 @@ pub struct Tagging {
     pub resource_id: i32,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct SearchResults {
+    pub resources: Vec<Resource>,
+    pub errors: Vec<String>,
+}
+
 impl Display for Resource {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(

@@ -8,7 +8,7 @@ use actix_web::{
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 
-use models::Resource;
+use models::{Resource, SearchResults};
 
 use crate::{
     services::{
@@ -24,7 +24,7 @@ use crate::{
 #[get("")]
 pub async fn search(data: Data<AppState>, Query(params): Query<QueryParams>) -> impl Responder {
     let (resources, errors) = _search(&data.db, params.query).await;
-    HttpResponse::Ok().json(Results { resources, errors })
+    HttpResponse::Ok().json(SearchResults { resources, errors })
 }
 
 // TODO parallelize all of these external calls
@@ -94,10 +94,4 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<Resource>, Vec<String>) {
 #[derive(Deserialize)]
 struct QueryParams {
     query: String,
-}
-
-#[derive(Serialize)]
-struct Results {
-    resources: Vec<Resource>,
-    errors: Vec<String>,
 }

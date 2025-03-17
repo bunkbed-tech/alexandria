@@ -53,3 +53,4 @@
 16. [ ] undo toast
 17. [ ] untrack confirmation dialog
 18. [ ] get slider to work again
+19. [ ] attempt importing rust types library with WASM into Typescript frontend
