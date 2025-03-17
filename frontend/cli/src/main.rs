@@ -1,12 +1,12 @@
-use std::io;
-
-use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyModifiers};
+use crossterm::event::{Event, EventStream, KeyCode, KeyEventKind, KeyModifiers};
+use futures::{FutureExt, StreamExt};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
     widgets::Widget,
     DefaultTerminal, Frame,
 };
+use tokio::time::{sleep, Duration};
 
 mod components;
 mod utils;
@@ -17,9 +17,11 @@ use crate::components::{
 };
 
 
-fn main() -> io::Result<()> {
+#[tokio::main]
+async fn main() -> color_eyre::Result<()> {
+    color_eyre::install()?;
     let mut terminal = ratatui::init();
-    let result = App::new().run(&mut terminal);
+    let result = App::new().run(&mut terminal).await;
     ratatui::restore();
     result
 }
@@ -28,6 +30,7 @@ struct App {
     login: Login,
     home: Home,
     exit: bool,
+    event_stream: EventStream,
 }
 
 impl App {
@@ -36,13 +39,14 @@ impl App {
             login: Login::new(),
             home: Home::new(),
             exit: false,
+            event_stream: EventStream::default(),
         }
     }
 
-    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+    pub async fn run(&mut self, terminal: &mut DefaultTerminal) -> color_eyre::Result<()> {
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
-            self.handle_events()?;
+            self.handle_events().await?;
         }
         Ok(())
     }
@@ -51,21 +55,32 @@ impl App {
         frame.render_widget(self, frame.area())
     }
 
-    fn handle_events(&mut self) -> io::Result<()> {
-        match event::read()? {
-            Event::Key(key) if (
-                key.kind == KeyEventKind::Press
-                && key.code == KeyCode::Char('c')
-                && key.modifiers.contains(KeyModifiers::CONTROL)
-            ) => self.exit = true,
-            input_event => {
-                if self.login.is_authenticated() {
-                    self.home.handle_event(input_event)?;
-                } else {
-                    self.login.handle_event(input_event)?;
+    async fn handle_events(&mut self) -> color_eyre::Result<()> {
+        tokio::select! {
+            event = self.event_stream.next().fuse() => {
+                match event {
+                    Some(Ok(evt)) => {
+                        match evt {
+                            Event::Key(key) if (
+                                key.kind == KeyEventKind::Press
+                                && key.code == KeyCode::Char('c')
+                                && key.modifiers.contains(KeyModifiers::CONTROL)
+                            ) => self.exit = true,
+                            input_event => {
+                                if self.login.is_authenticated() {
+                                    self.home.handle_event(input_event).await?;
+                                } else {
+                                    self.login.handle_event(input_event).await?;
+                                }
+                            },
+                        }
+                    }
+                    _ => {}
                 }
-            },
-        };
+            }
+            // Sleep for a short duration to avoid busy waiting.
+            _ = sleep(Duration::from_millis(100)) => {}
+        }
         Ok(())
     }
 }

@@ -1,5 +1,3 @@
-use std::io;
-
 use crossterm::event::Event;
 use ratatui::{
     buffer::Buffer,
@@ -20,8 +18,8 @@ impl Library {
         }
     }
 
-    pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
-        self.media_grid.handle_event(event)?;
+    pub async fn handle_event(&mut self, event: Event) -> color_eyre::Result<()> {
+        self.media_grid.handle_event(event).await?;
         Ok(())
     }
 }

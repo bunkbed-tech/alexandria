@@ -1,5 +1,3 @@
-use std::io;
-
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
@@ -30,7 +28,7 @@ impl Sidebar {
         }
     }
 
-    pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
+    pub async fn handle_event(&mut self, event: Event) -> color_eyre::Result<()> {
         match event {
             Event::Key(key) if key.kind == KeyEventKind::Press => {
                 match key.code {

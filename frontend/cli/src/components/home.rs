@@ -1,5 +1,3 @@
-use std::io;
-
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
@@ -40,7 +38,7 @@ impl Home {
         }
     }
 
-    pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
+    pub async fn handle_event(&mut self, event: Event) -> color_eyre::Result<()> {
         match event {
             Event::Key(key) if key.kind == KeyEventKind::Press && key.code == KeyCode::Tab => {
                 self.active_pane = match self.active_pane {
@@ -49,10 +47,10 @@ impl Home {
                 };
             },
             input => match self.active_pane {
-                ActivePane::Sidebar => self.sidebar.handle_event(input)?,
+                ActivePane::Sidebar => self.sidebar.handle_event(input).await?,
                 ActivePane::Page => match self.sidebar.page {
-                    Page::Explore => self.explore.handle_event(input)?,
-                    Page::Library => self.library.handle_event(input)?,
+                    Page::Explore => self.explore.handle_event(input).await?,
+                    Page::Library => self.library.handle_event(input).await?,
                 },
             },
         };

@@ -1,5 +1,3 @@
-use std::io;
-
 use crossterm::event::Event;
 use ratatui::{
     buffer::Buffer,
@@ -45,7 +43,7 @@ impl MediaGrid {
         }
     }
 
-    pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
+    pub async fn handle_event(&mut self, event: Event) -> color_eyre::Result<()> {
         match self.state {
             State::Searching => match event.into() {
                 Input { key: Key::Esc, .. } => self.state = State::Navigating,

@@ -1,5 +1,3 @@
-use std::io;
-
 use crossterm::event::Event;
 use ratatui::{
     buffer::Buffer,
@@ -85,7 +83,7 @@ impl Login {
         }
     }
 
-    pub fn handle_event(&mut self, event: Event) -> io::Result<()> {
+    pub async fn handle_event(&mut self, event: Event) -> color_eyre::Result<()> {
         match event.into() {
             Input { key: Key::Tab, .. } => match self.active_input {
                 ActiveInput::Username => {
