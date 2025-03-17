@@ -3,9 +3,13 @@ use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
     style::{Color, Modifier, Style},
+    text::Text,
     widgets::{Block, Widget},
 };
+use reqwest::Client;
 use tui_textarea::{Input, Key, TextArea};
+
+use models::{Resource, SearchResults};
 
 use crate::utils::area_minus_border;
 
@@ -20,6 +24,29 @@ pub struct MediaGrid {
     search: TextArea<'static>,
     state: State,
     focused: Option<(usize, usize)>,
+    results: Vec<Resource>,
+}
+
+// TODO loading state to show that the query is still happening
+// TODO navigation of paginated grid of results
+// TODO show the page number, total pages, etc.
+// TODO create a nice looking card for each resource using the fields
+// TODO keybindings for tracking and untracking resources + visual feedback
+
+async fn search_api(query: String) -> Result<Vec<Resource>, String> {
+    Client::new()
+        .get("http://localhost:8080/search")
+        .query(&[("query", query)])
+        .header("Content-Type", "application/json")
+        .header("Accept", "application/json")
+        .send()
+        .await
+        .map_err(|err| String::from("[media_grid:_:get] ") + &err.to_string())?
+        .json::<SearchResults>()
+        .await
+        .map_err(|err| String::from("[media_grid:_:json] ") + &err.to_string())
+        // FIXME don't ignore the errors!
+        .map(|results| results.resources)
 }
 
 fn render_search_state(search: &mut TextArea, state: &State) {
@@ -40,6 +67,7 @@ impl MediaGrid {
             search,
             state,
             focused: Some((0, 0)),
+            results: Vec::new(),
         }
     }
 
@@ -47,6 +75,13 @@ impl MediaGrid {
         match self.state {
             State::Searching => match event.into() {
                 Input { key: Key::Esc, .. } => self.state = State::Navigating,
+                Input { key: Key::Enter, .. } => {
+                    match search_api(self.search.lines().join("/")).await {
+                        Ok(resources) => self.results = resources,
+                        // TODO make search bar border red
+                        Err(_message) => {},
+                    };
+                },
                 input => { self.search.input(input); },
             },
             State::Navigating => match event.into() {
@@ -85,6 +120,10 @@ impl Widget for &MediaGrid {
             for (x, cell) in row.iter().enumerate() {
                 let color = if self.focused == Some((x, y)) { Color::Green } else { Color::Gray };
                 Block::bordered().border_style(Style::default().fg(color)).render(*cell, buf);
+
+                if let Some(resource) = self.results.get(y * GRID_ROWS + x) {
+                    Text::from(resource.title.clone()).render(area_minus_border(*cell), buf);
+                }
             }
         }
     }
