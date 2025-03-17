@@ -73,7 +73,7 @@ impl Widget for &MediaGrid {
         Block::bordered().title("Search").render(header_area, buf);
 
         let grid_layout = Layout::vertical([Constraint::Min(1); GRID_ROWS])
-            .split(area_minus_border(content_area))
+            .split(content_area)
             .iter()
             .map(|&area| {
                 Layout::horizontal([Constraint::Min(1); 3])
