@@ -27,7 +27,7 @@ pub struct Tagging {
     pub resource_id: i32,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct SearchResults {
     pub resources: Vec<Resource>,
     pub errors: Vec<String>,
