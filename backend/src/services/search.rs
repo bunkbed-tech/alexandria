@@ -29,7 +29,7 @@ pub async fn search(data: Data<AppState>, Query(params): Query<QueryParams>) -> 
 
 // TODO avoid cloning the query for every call
 // TODO implement smarter fuzzy search to mix results from different APIs
-async fn _search(pool: &PgPool, query: String) -> (Vec<Resource>, Vec<String>) {
+async fn _search(pool: &PgPool, query: String) -> (Vec<impl Resource>, Vec<String>) {
     let ((mut bgg_resources, mut bgg_errors), anilist_result, vndb_result, igdb_result) = tokio::join!(
         search_bgg_things(query.clone()),
         search_anilist(
@@ -63,7 +63,7 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<Resource>, Vec<String>) {
         Ok(_resources) => _resources,
         Err(db_error) => {
             combined.errors.push(db_error);
-            Vec::<Resource>::new()
+            Vec::<impl Resource>::new()
         }
     };
 
@@ -76,7 +76,7 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<Resource>, Vec<String>) {
             )
         })
         .collect();
-    let matched_resources: Vec<Resource> = combined
+    let matched_resources: Vec<impl Resource> = combined
         .resources
         .into_iter()
         .map(|mut resource| {

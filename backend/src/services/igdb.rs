@@ -5,7 +5,7 @@ use chrono::{Datelike, TimeZone, Utc};
 use reqwest::Client;
 use serde::Deserialize;
 
-use models::Resource;
+use models::{ResourceMeta, VideoGame};
 
 use crate::http::respond;
 
@@ -14,7 +14,7 @@ pub async fn igdb_search(Query(params): Query<QueryParams>) -> impl Responder {
     respond(search_igdb(params.query).await)
 }
 
-pub async fn search_igdb(query: String) -> Result<Vec<Resource>, String> {
+pub async fn search_igdb(query: String) -> Result<Vec<VideoGame>, String> {
     let client_id =
         var("ALEXANDRIA_IGDB_CLIENT_ID").expect("ALEXANDRIA_IGDB_CLIENT_ID must be set");
     let client_id_str = client_id.as_str();
@@ -77,18 +77,21 @@ pub async fn search_igdb(query: String) -> Result<Vec<Resource>, String> {
         .collect::<HashMap<i32, String>>();
     Ok(games
         .into_iter()
-        .map(|game| Resource {
+        .map(|game| VideoGame {
             id: None,
-            title: game.name,
-            description: game.summary,
-            year_published: game
-                .first_release_date
-                .map(|date| Utc.timestamp_opt(date, 0).unwrap().year()),
-            thumbnail: game
-                .cover
-                .as_ref()
-                .map(|id| format!("https:{}", covers[id].clone())),
-            api_id: game.id,
+            meta: ResourceMeta {
+                id: None,
+                title: game.name,
+                description: game.summary,
+                year_published: game
+                    .first_release_date
+                    .map(|date| Utc.timestamp_opt(date, 0).unwrap().year()),
+                thumbnail: game
+                    .cover
+                    .as_ref()
+                    .map(|id| format!("https:{}", covers[id].clone())),
+                api_id: game.id,
+            },
         })
         .collect())
 }
@@ -128,13 +131,16 @@ mod tests {
     async fn test_search_igdb() {
         let query = String::from("fretless");
         let resources = search_igdb(query).await.unwrap();
-        let expected_resources = vec![Resource {
+        let expected_resources = vec![VideoGame {
             id: None,
-            api_id: 252794,
-            title: String::from("Fretless"),
-            year_published: Some(2025),
-            description: Some(String::from("In this turned-based RPG, wield powerful legendary instruments, gather mighty riff attacks and save the land from Rick Riffson\u{0027}s devilish goons and musical hybrid monsters!")),
-            thumbnail: Some(String::from("https://images.igdb.com/igdb/image/upload/t_thumb/co6lw2.jpg")),
+            meta: ResourceMeta {
+                id: None,
+                api_id: 252794,
+                title: String::from("Fretless"),
+                year_published: Some(2025),
+                description: Some(String::from("In this turned-based RPG, wield powerful legendary instruments, gather mighty riff attacks and save the land from Rick Riffson\u{0027}s devilish goons and musical hybrid monsters!")),
+                thumbnail: Some(String::from("https://images.igdb.com/igdb/image/upload/t_thumb/co6lw2.jpg")),
+            }
         }];
         assert_eq!(resources, expected_resources);
     }

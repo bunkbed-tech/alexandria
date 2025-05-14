@@ -5,7 +5,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, to_value};
 
-use models::Resource;
+use models::{AlexandriaResource, AnimeMovie, AnimeTVShow, LightNovel, Manga, ResourceMeta};
 
 use crate::http::respond;
 
@@ -20,7 +20,7 @@ pub async fn anilist_search(Query(params): Query<QueryParams>) -> impl Responder
 pub async fn search_anilist<Format>(
     search: String,
     media_format: Format,
-) -> Result<Vec<Resource>, String>
+) -> Result<Vec<AlexandriaResource>, String>
 where
     Format: Into<Vec<MediaFormat>>,
 {
@@ -39,34 +39,50 @@ where
         variables["type"] = to_value(**media_types.first().unwrap()).unwrap();
     }
     let json = json!({"query": QUERY, "variables": variables});
-
-    Client::new()
+    let results = Client::new()
         .post("https://graphql.anilist.co")
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
         .body(json.to_string())
         .send()
         .await
-        .map_err(|err| String::from("[search_anilist:_:post] ") + &err.to_string())?
+        .map_err(|err| format!("[search_anilist:_:post] {}", err))?
         .json::<SearchResults>()
         .await
-        .map_err(|err| String::from("[search_anilist:_:json] ") + &err.to_string())
-        .map(|results| {
-            results
-                .data
-                .page
-                .media
-                .iter()
-                .map(|result| Resource {
+        .map_err(|err| format!("[search_anilist:_:json] {}", err))?
+        .data
+        .page
+        .media
+        .iter()
+        .filter_map(|result| {
+            let meta = ResourceMeta {
+                id: None,
+                title: result.title.english.clone(),
+                description: Some(result.description.clone()),
+                year_published: Some(result.start_date.year.clone()),
+                thumbnail: Some(result.cover_image.medium.clone()),
+                api_id: result.id,
+            };
+
+            match result.format {
+                MediaFormat::TV => Some(AlexandriaResource::AnimeTVShow(AnimeTVShow {
                     id: None,
-                    title: result.title.english.clone(),
-                    description: Some(result.description.clone()),
-                    year_published: Some(result.start_date.year.clone()),
-                    thumbnail: Some(result.cover_image.medium.clone()),
-                    api_id: result.id,
-                })
-                .collect::<Vec<Resource>>()
+                    meta,
+                })),
+                MediaFormat::MANGA => Some(AlexandriaResource::Manga(Manga { id: None, meta })),
+                MediaFormat::NOVEL => Some(AlexandriaResource::LightNovel(LightNovel {
+                    id: None,
+                    meta,
+                })),
+                MediaFormat::MOVIE => Some(AlexandriaResource::AnimeMovie(AnimeMovie {
+                    id: None,
+                    meta,
+                })),
+            }
         })
+        .collect::<Vec<AlexandriaResource>>();
+
+    Ok(results)
 }
 
 const QUERY: &str = "
@@ -84,6 +100,7 @@ query ($search: String!, $type: MediaType, $formats: [MediaFormat!]!) {
       coverImage {
         medium
       }
+      format
     }
   }
 }
@@ -138,6 +155,7 @@ struct Media {
     start_date: FuzzyDate,
     title: MediaTitle,
     cover_image: CoverImage,
+    format: MediaFormat,
 }
 
 #[derive(Deserialize)]
