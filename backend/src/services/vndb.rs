@@ -2,7 +2,7 @@ use actix_web::{get, web::Query, Responder};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-use models::Resource;
+use models::AlexandriaResource;
 
 use crate::http::respond;
 
@@ -11,7 +11,7 @@ pub async fn vndb_search(Query(params): Query<QueryParams>) -> impl Responder {
     respond(search_vndb(params.query).await)
 }
 
-pub async fn search_vndb(query: String) -> Result<Vec<Resource>, String> {
+pub async fn search_vndb(query: String) -> Result<Vec<AlexandriaResource>, String> {
     Client::new()
         .post("https://api.vndb.org/kana/vn")
         .json(&RequestData {
@@ -30,7 +30,7 @@ pub async fn search_vndb(query: String) -> Result<Vec<Resource>, String> {
             results
                 .results
                 .iter()
-                .map(|result| Resource {
+                .map(|result| AlexandriaResource {
                     id: None,
                     title: result.title.clone(),
                     description: result.description.clone(),
@@ -45,7 +45,7 @@ pub async fn search_vndb(query: String) -> Result<Vec<Resource>, String> {
                         .and_then(|id| id.parse().ok())
                         .expect("What the hell VNDB"),
                 })
-                .collect::<Vec<Resource>>()
+                .collect::<Vec<AlexandriaResource>>()
         })
 }
 
@@ -93,7 +93,7 @@ mod tests {
     async fn test_search_vndb() {
         let query = String::from("steins divergence");
         let resources = search_vndb(query).await.unwrap();
-        let expected_resources = vec![Resource {
+        let expected_resources = vec![AlexandriaResource {
             id: None,
             api_id: 15695,
             title: String::from("Steins;Gate Divergence"),

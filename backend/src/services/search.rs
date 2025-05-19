@@ -8,7 +8,7 @@ use actix_web::{
 use serde::Deserialize;
 use sqlx::postgres::PgPool;
 
-use models::{Resource, SearchResults};
+use models::{AlexandriaResource, SearchResults};
 
 use crate::{
     services::{
@@ -29,7 +29,7 @@ pub async fn search(data: Data<AppState>, Query(params): Query<QueryParams>) -> 
 
 // TODO avoid cloning the query for every call
 // TODO implement smarter fuzzy search to mix results from different APIs
-async fn _search(pool: &PgPool, query: String) -> (Vec<impl Resource>, Vec<String>) {
+async fn _search(pool: &PgPool, query: String) -> (Vec<AlexandriaResource>, Vec<String>) {
     let ((mut bgg_resources, mut bgg_errors), anilist_result, vndb_result, igdb_result) = tokio::join!(
         search_bgg_things(query.clone()),
         search_anilist(
@@ -63,7 +63,7 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<impl Resource>, Vec<Strin
         Ok(_resources) => _resources,
         Err(db_error) => {
             combined.errors.push(db_error);
-            Vec::<impl Resource>::new()
+            Vec::<AlexandriaResource>::new()
         }
     };
 
@@ -76,7 +76,7 @@ async fn _search(pool: &PgPool, query: String) -> (Vec<impl Resource>, Vec<Strin
             )
         })
         .collect();
-    let matched_resources: Vec<impl Resource> = combined
+    let matched_resources: Vec<AlexandriaResource> = combined
         .resources
         .into_iter()
         .map(|mut resource| {

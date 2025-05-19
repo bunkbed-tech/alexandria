@@ -184,7 +184,7 @@ mod tests {
     async fn test_search_anilist_movie() {
         let search = String::from("Paprika");
         let resources = search_anilist(search, MediaFormat::MOVIE).await.unwrap();
-        let expected_resources = vec![Resource {
+        let expected_resources = vec![AlexandriaResource {
             id: None,
             api_id: 1943,
             title: String::from("Paprika"),
@@ -199,7 +199,7 @@ mod tests {
     async fn test_search_anilist_tv() {
         let search = String::from("Buddy Daddies");
         let resources = search_anilist(search, MediaFormat::TV).await.unwrap();
-        let expected_resources = vec![Resource {
+        let expected_resources = vec![AlexandriaResource {
             id: None,
             api_id: 155907,
             title: String::from("Buddy Daddies"),
@@ -214,7 +214,7 @@ mod tests {
     async fn test_search_anilist_novel() {
         let search = String::from("All You Need Is Kill");
         let resources = search_anilist(search, MediaFormat::NOVEL).await.unwrap();
-        let expected_resources = vec![Resource {
+        let expected_resources = vec![AlexandriaResource {
             id: None,
             api_id: 48511,
             title: String::from("All You Need is Kill"),
@@ -229,7 +229,7 @@ mod tests {
     async fn test_search_anilist_manga() {
         let search = String::from("All You Need Is Kill");
         let resources = search_anilist(search, MediaFormat::MANGA).await.unwrap();
-        let expected_resources = vec![Resource {
+        let expected_resources = vec![AlexandriaResource {
             id: None,
             api_id: 85215,
             title: String::from("All You Need Is Kill"),
@@ -247,7 +247,7 @@ mod tests {
             .await
             .unwrap();
         let expected_resources = vec![
-            Resource {
+            AlexandriaResource {
                 id: None,
                 api_id: 85215,
                 title: String::from("All You Need Is Kill"),
@@ -255,7 +255,7 @@ mod tests {
                 year_published: Some(2014),
                 thumbnail: Some(String::from("https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx85215-oHqG7fkrpas9.png")),
             },
-            Resource {
+            AlexandriaResource {
               id: None,
               api_id: 48511,
               title: String::from("All You Need is Kill"),
@@ -274,7 +274,7 @@ mod tests {
             .await
             .unwrap();
         let expected_resources = vec![
-            Resource {
+            AlexandriaResource {
                 id: None,
                 api_id: 205,
                 title: String::from("Samurai Champloo"),
@@ -282,7 +282,7 @@ mod tests {
                 year_published: Some(2004),
                 thumbnail: Some(String::from("https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx205-xxonQKyJtVcw.png")),
             },
-            Resource {
+            AlexandriaResource {
               id: None,
               api_id: 30512,
               title: String::from("Samurai Champloo"),

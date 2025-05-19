@@ -8,7 +8,7 @@ use actix_web::{
 use serde::{Deserialize, Deserializer};
 use sqlx::postgres::PgPool;
 
-use models::Resource;
+use models::AlexandriaResource;
 
 use crate::{http::respond, state::AppState};
 
@@ -33,11 +33,11 @@ pub async fn resource_untrack(data: Data<AppState>, path: Path<i32>) -> impl Res
     respond(untrack_resource(&data.db, path.into_inner()).await)
 }
 
-pub async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<Resource>, String> {
-    let rows: Vec<Resource>;
+pub async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<AlexandriaResource>, String> {
+    let rows: Vec<AlexandriaResource>;
     if let Some(api_ids) = ids {
         rows = sqlx::query_as!(
-            Resource,
+            AlexandriaResource,
             r#"SELECT * FROM resource WHERE api_id = ANY($1)"#,
             &api_ids
         )
@@ -45,7 +45,7 @@ pub async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<
         .await
         .expect("Unable to list resources")
     } else {
-        rows = sqlx::query_as!(Resource, r#"SELECT * FROM resource"#)
+        rows = sqlx::query_as!(AlexandriaResource, r#"SELECT * FROM resource"#)
             .fetch_all(pool)
             .await
             .expect("Unable to list resources")
@@ -53,13 +53,13 @@ pub async fn list_resources(pool: &PgPool, ids: Option<Vec<i32>>) -> Result<Vec<
     Ok(rows)
 }
 
-async fn track_resource(pool: &PgPool, resource: Resource) -> Result<Resource, String> {
+async fn track_resource(pool: &PgPool, resource: AlexandriaResource) -> Result<AlexandriaResource, String> {
     if let Some(_) = resource.id {
-        return Err(format!("Resource {} is already tracked.", resource));
+        return Err(format!("AlexandriaResource {} is already tracked.", resource));
     }
     let db_resource = {
         sqlx::query_as!(
-            Resource,
+            AlexandriaResource,
             r#"INSERT INTO resource (title, description, year_published, thumbnail, api_id) VALUES ($1, $2, $3, $4, $5) RETURNING *"#,
             resource.title,
             resource.description,
@@ -73,10 +73,10 @@ async fn track_resource(pool: &PgPool, resource: Resource) -> Result<Resource, S
     Ok(db_resource)
 }
 
-async fn untrack_resource(pool: &PgPool, id: i32) -> Result<Resource, String> {
+async fn untrack_resource(pool: &PgPool, id: i32) -> Result<AlexandriaResource, String> {
     let mut resource = {
         sqlx::query_as!(
-            Resource,
+            AlexandriaResource,
             r#"DELETE FROM resource WHERE id = $1 RETURNING *"#,
             id,
         )
@@ -104,7 +104,7 @@ where
 
 #[derive(Deserialize)]
 struct ResourceData {
-    resource: Resource,
+    resource: AlexandriaResource,
 }
 
 #[derive(Deserialize)]
@@ -123,7 +123,7 @@ mod tests {
         let ids: Option<Vec<i32>> = None;
         let resources = list_resources(&pool, ids).await.unwrap();
         let expected_resources = vec![
-            Resource {
+            AlexandriaResource {
                 id: Some(1),
                 title: String::from("Scythe"),
                 description: Some(String::from("Really good game")),
@@ -131,7 +131,7 @@ mod tests {
                 thumbnail: Some(String::from("https://google.com")),
                 api_id: 9000,
             },
-            Resource {
+            AlexandriaResource {
                 id: Some(2),
                 title: String::from("Cranium Cadoo"),
                 description: None,
@@ -147,7 +147,7 @@ mod tests {
     async fn test_list_resources_missing(pool: PgPool) {
         let ids = Some(vec![1]);
         let resources = list_resources(&pool, ids).await.unwrap();
-        let expected_resources = Vec::<Resource>::new();
+        let expected_resources = Vec::<AlexandriaResource>::new();
         assert_eq!(resources, expected_resources);
     }
 
@@ -155,7 +155,7 @@ mod tests {
     async fn test_list_resources_some(pool: PgPool) {
         let ids = Some(vec![9000]);
         let resources = list_resources(&pool, ids).await.unwrap();
-        let expected_resources = vec![Resource {
+        let expected_resources = vec![AlexandriaResource {
             id: Some(1),
             title: String::from("Scythe"),
             description: Some(String::from("Really good game")),
@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     async fn test_track_resource_untracked(pool: PgPool) {
-        let untracked_resource = Resource {
+        let untracked_resource = AlexandriaResource {
             id: None,
             title: String::from("Scythe"),
             description: Some(String::from("Really good game")),
@@ -177,7 +177,7 @@ mod tests {
             api_id: 9000,
         };
         let tracked_resource = track_resource(&pool, untracked_resource).await.unwrap();
-        let expected_tracked_resource = Resource {
+        let expected_tracked_resource = AlexandriaResource {
             id: Some(1),
             title: String::from("Scythe"),
             description: Some(String::from("Really good game")),
@@ -190,7 +190,7 @@ mod tests {
 
     #[test]
     async fn test_track_resource_tracked(pool: PgPool) {
-        let tracked_resource = Resource {
+        let tracked_resource = AlexandriaResource {
             id: Some(1),
             title: String::from("Scythe"),
             description: Some(String::from("Really good game")),
@@ -205,7 +205,7 @@ mod tests {
     async fn test_track_resource_invalid(pool: PgPool) {
         // This is invalid because the resource is already in the database, but id is None
         // This should probably only happen if we make a mistake in developing the app
-        let untracked_resource = Resource {
+        let untracked_resource = AlexandriaResource {
             id: None,
             title: String::from("Scythe"),
             description: Some(String::from("Really good game")),
@@ -218,7 +218,7 @@ mod tests {
 
     #[test(fixtures("resources"))]
     async fn test_untrack_resource(pool: PgPool) {
-        let tracked_resource = Resource {
+        let tracked_resource = AlexandriaResource {
             id: Some(1),
             title: String::from("Scythe"),
             description: Some(String::from("Really good game")),
@@ -229,7 +229,7 @@ mod tests {
         let untracked_resource = untrack_resource(&pool, tracked_resource.id.unwrap())
             .await
             .unwrap();
-        let expected_untracked_resource = Resource {
+        let expected_untracked_resource = AlexandriaResource {
             id: None,
             title: String::from("Scythe"),
             description: Some(String::from("Really good game")),

@@ -6,7 +6,7 @@ use quick_xml::de::from_str;
 use reqwest::get as rget;
 use serde::{Deserialize, Deserializer, Serialize};
 
-use models::Resource;
+use models::AlexandriaResource;
 
 use crate::http::respond;
 
@@ -42,7 +42,7 @@ async fn search_bgg(query: String) -> Result<Vec<i32>, String> {
         .collect::<Vec<_>>())
 }
 
-async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
+async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<AlexandriaResource>, String> {
     let thing_xml = bgg_thing_xml(ids.clone()).await?;
     let thing_items: ThingItems = from_str(&thing_xml).map_err(|err| {
         String::from("[list_bgg_things:thing_items:from_str] ") + &err.to_string() + &thing_xml
@@ -53,7 +53,7 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
         .into_iter()
         .filter(|thing| thing.name.is_some())
         .zip(ids)
-        .map(|(thing, id)| Resource {
+        .map(|(thing, id)| AlexandriaResource {
             id: None,
             title: thing
                 .name
@@ -78,20 +78,20 @@ async fn list_bgg_things(ids: Vec<i32>) -> Result<Vec<Resource>, String> {
     Ok(resources)
 }
 
-pub async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
+pub async fn search_bgg_things(query: String) -> (Vec<AlexandriaResource>, Vec<String>) {
     match search_bgg(query).await {
         Ok(resource_ids) => {
             // BGG /thing API has a limit of 20 IDs, so we chunk the IDs
             // We also limit the number of resources to 100 so as not to take too long
             let maximum_resource_ids = &resource_ids[..100.min(resource_ids.len())];
-            let chunk_results: Vec<Result<Vec<Resource>, String>> =
+            let chunk_results: Vec<Result<Vec<AlexandriaResource>, String>> =
                 futures::future::join_all(list_bgg_things_chunks(maximum_resource_ids.chunks(20)))
                     .await;
             let (successes, errors): (
-                Vec<Result<Vec<Resource>, String>>,
-                Vec<Result<Vec<Resource>, String>>,
+                Vec<Result<Vec<AlexandriaResource>, String>>,
+                Vec<Result<Vec<AlexandriaResource>, String>>,
             ) = chunk_results.into_iter().partition(|result| result.is_ok());
-            let successes: Vec<Resource> = successes
+            let successes: Vec<AlexandriaResource> = successes
                 .into_iter()
                 .map(|r| r.unwrap())
                 .flatten()
@@ -100,7 +100,7 @@ pub async fn search_bgg_things(query: String) -> (Vec<Resource>, Vec<String>) {
             (successes, errors)
         }
         Err(error) => {
-            let empty_results: Vec<Resource> = Vec::new();
+            let empty_results: Vec<AlexandriaResource> = Vec::new();
             (empty_results, vec![error])
         }
     }
@@ -136,7 +136,7 @@ async fn bgg_search_xml(query: String) -> Result<String, String> {
 // We couldn't include "impl Future" outside of a function signature, so we had to write this -_-
 fn list_bgg_things_chunks(
     chunks: Chunks<'_, i32>,
-) -> Vec<impl Future<Output = Result<Vec<Resource>, String>>> {
+) -> Vec<impl Future<Output = Result<Vec<AlexandriaResource>, String>>> {
     chunks
         .map(|chunk| list_bgg_things(chunk.to_vec()))
         .collect()
@@ -164,7 +164,7 @@ struct QueryParams {
 
 #[derive(Serialize)]
 struct SearchThingsResults {
-    resources: Vec<Resource>,
+    resources: Vec<AlexandriaResource>,
     errors: Vec<String>,
 }
 
@@ -281,7 +281,7 @@ mod tests {
         let ids = vec![14454, 6420];
         let resources = list_bgg_things(ids).await.unwrap();
         let expected_resources = vec![
-            Resource {
+            AlexandriaResource {
                 id: None,
                 api_id: 6420,
                 title: String::from("Cranium Cadoo"),
@@ -289,7 +289,7 @@ mod tests {
                 year_published: Some(2001),
                 thumbnail: Some(String::from("https://cf.geekdo-images.com/hQI6W-7HwKty4c5yLFP-Aw__thumb/img/_IyE4nIyGh7_PVfGCarLoNmDMGc=/fit-in/200x150/filters:strip_icc()/pic3335930.jpg")),
             },
-            Resource {
+            AlexandriaResource {
                 id: None,
                 api_id: 14454,
                 title: String::from("Cranium Cadoo Booster Box"),
@@ -305,7 +305,7 @@ mod tests {
     async fn test_list_bgg_things_invalid() {
         let ids = vec![0];
         let resources = list_bgg_things(ids).await.unwrap();
-        let expected_resources = Vec::<Resource>::new();
+        let expected_resources = Vec::<AlexandriaResource>::new();
         assert_eq!(resources, expected_resources);
     }
 }
