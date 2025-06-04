@@ -1,21 +1,12 @@
 use crossterm::event::{Event, EventStream, KeyCode, KeyEventKind, KeyModifiers};
 use futures::{FutureExt, StreamExt};
-use ratatui::{
-    buffer::Buffer,
-    layout::Rect,
-    widgets::Widget,
-    DefaultTerminal, Frame,
-};
+use ratatui::{buffer::Buffer, layout::Rect, widgets::Widget, DefaultTerminal, Frame};
 use tokio::time::{sleep, Duration};
 
 mod components;
 mod utils;
 
-use crate::components::{
-    home::Home,
-    login::Login,
-};
-
+use crate::components::{home::Home, login::Login};
 
 #[tokio::main]
 async fn main() -> color_eyre::Result<()> {

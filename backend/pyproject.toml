@@ -1,0 +1,13 @@
+[project]
+name = "alexandria"
+version = "0.0.1"
+authors = [
+  "Tristan Schrader <t0rdos@pm.me>",
+  "Tahoe Schrader <tahoeschrader@gmail.com",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "bgg-api>=1.1.12",
+    "fastapi[standard]>=0.115.12",
+    "sqlalchemy[postgresql-psycopgbinary]>=2.0.41",
+]

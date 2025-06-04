@@ -1,9 +1,5 @@
 use crossterm::event::Event;
-use ratatui::{
-    buffer::Buffer,
-    layout::Rect,
-    widgets::Widget,
-};
+use ratatui::{buffer::Buffer, layout::Rect, widgets::Widget};
 
 use crate::components::media_grid::MediaGrid;
 

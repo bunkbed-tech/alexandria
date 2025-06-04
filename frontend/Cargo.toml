@@ -1,0 +1,11 @@
+[workspace]
+members = ["cli", "desktop"]
+resolver = "2"
+
+[workspace.package]
+authors = [
+  "Tristan Schrader <t0rdos@pm.me>",
+  "Tahoe Schrader <tahoeschrader@gmail.com",
+]
+edition = "2021"
+version = "0.0.1"

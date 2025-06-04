@@ -14,31 +14,33 @@ services:
       - postgres-logs:/var/lib/postgresql/pg_log
     ports:
       - 5432:5432
-  migrate:
-    build:
-      context: backend
-      dockerfile: migrate.Dockerfile
-    container_name: migrate
-    environment:
-      DATABASE_URL: postgresql://$POSTGRES_USER:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/$POSTGRES_DB
-    command: [ cargo, sqlx, migrate, run ]
-    depends_on:
-      postgres:
-        condition: service_healthy
+  # migrate:
+  #   build:
+  #     context: backend
+  #     dockerfile: migrate.Dockerfile
+  #   container_name: migrate
+  #   environment:
+  #     DATABASE_URL: postgresql://$POSTGRES_USER:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/$POSTGRES_DB
+  #   command: [ cargo, sqlx, migrate, run ]
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
   backend:
-    image: rust:1.83
+    image: python:3.12
     container_name: backend
     environment:
-      DATABASE_URL: postgresql://$POSTGRES_USER:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/$POSTGRES_DB
+      DATABASE_URL: postgresql+psycopg://$POSTGRES_USER:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/$POSTGRES_DB
       ALEXANDRIA_IGDB_CLIENT_ID: ${ALEXANDRIA_IGDB_CLIENT_ID}
       ALEXANDRIA_IGDB_CLIENT_SECRET: ${ALEXANDRIA_IGDB_CLIENT_SECRET}
     working_dir: /app/backend
-    command: [ cargo, run ]
+    entrypoint: [./entrypoint.sh]
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    #   migrate:
+    #     condition: service_completed_successfully
     ports:
-      - 8080:8080
+      - 8000:8000
     volumes:
       - ./:/app
   # frontend:

@@ -32,13 +32,19 @@ impl Sidebar {
         match event {
             Event::Key(key) if key.kind == KeyEventKind::Press => {
                 match key.code {
-                    KeyCode::Char('j') => self.index = (self.index + 1).rem_euclid(Page::COUNT as isize),
-                    KeyCode::Char('k') => self.index = (self.index - 1).rem_euclid(Page::COUNT as isize),
-                    KeyCode::Enter => self.page = Page::from_repr(self.index as usize).expect("Unreachable"),
-                    _ => {},
+                    KeyCode::Char('j') => {
+                        self.index = (self.index + 1).rem_euclid(Page::COUNT as isize)
+                    }
+                    KeyCode::Char('k') => {
+                        self.index = (self.index - 1).rem_euclid(Page::COUNT as isize)
+                    }
+                    KeyCode::Enter => {
+                        self.page = Page::from_repr(self.index as usize).expect("Unreachable")
+                    }
+                    _ => {}
                 };
-            },
-            _ => {},
+            }
+            _ => {}
         };
         Ok(())
     }
@@ -47,8 +53,16 @@ impl Sidebar {
 impl Widget for &Sidebar {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let lines = Page::iter().map(|page| {
-            let color = if page == self.page { Color::Magenta } else { Color::Gray };
-            let symbol = if page as isize == self.index { ">" } else { " " };
+            let color = if page == self.page {
+                Color::Magenta
+            } else {
+                Color::Gray
+            };
+            let symbol = if page as isize == self.index {
+                ">"
+            } else {
+                " "
+            };
             let line = Line::styled(format!("{} {page}", symbol), Style::default().fg(color));
             ListItem::new(line)
         });

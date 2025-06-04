@@ -11,7 +11,6 @@ use tui_textarea::{CursorMove, Input, Key, TextArea};
 
 use crate::utils::{area_minus_border, center_widget};
 
-
 fn inactivate(textarea: &mut TextArea) {
     textarea.set_cursor_style(Style::default());
 }
@@ -54,7 +53,7 @@ impl Login {
 
         let mut password = TextArea::default();
         password.set_cursor_line_style(Style::default());
-        password.set_mask_char('\u{1F921}');  // clown emoji
+        password.set_mask_char('\u{1F921}'); // clown emoji
         inactivate(&mut password);
 
         Login {
@@ -90,21 +89,23 @@ impl Login {
                     inactivate(&mut self.username);
                     activate(&mut self.password);
                     self.active_input = ActiveInput::Password;
-                },
+                }
                 ActiveInput::Password => {
                     activate(&mut self.username);
                     inactivate(&mut self.password);
                     self.active_input = ActiveInput::Username;
-                },
+                }
             },
-            Input { key: Key::Enter, .. } => self.login(),
+            Input {
+                key: Key::Enter, ..
+            } => self.login(),
             input => {
                 let active_input = match self.active_input {
                     ActiveInput::Username => &mut self.username,
                     ActiveInput::Password => &mut self.password,
                 };
                 active_input.input(input);
-            },
+            }
         };
         Ok(())
     }
@@ -112,11 +113,7 @@ impl Login {
 
 impl Widget for &Login {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let centered_rect = center_widget(
-            area,
-            Constraint::Length(50),
-            Constraint::Length(5),
-        );
+        let centered_rect = center_widget(area, Constraint::Length(50), Constraint::Length(5));
         let unbordered_rect = area_minus_border(centered_rect);
         // Split it into three lines
         let lines = Layout::default()
@@ -131,7 +128,7 @@ impl Widget for &Login {
         let input_layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([
-                Constraint::Length(9),  // (len("Username") or len("Password")) + 1
+                Constraint::Length(9), // (len("Username") or len("Password")) + 1
                 Constraint::Min(1),
             ]);
 
